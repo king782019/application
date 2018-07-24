@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p th:if="${param.error}">Invalid Login or Password</p>
+<p th:if="${param.errorExist}">Username exists</p>
+<form th:action="@{/signup}" method="post">
+    <input type="text" id="username" name="username"/>
+    <input type="password" id="password" name="password"/>
+    <input type="submit"/>
+</form>
+</body>
+</html>
