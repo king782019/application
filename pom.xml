@@ -88,6 +88,7 @@
             </plugin>
 
         </plugins>
+        <finalName>cloud.jar</finalName>
     </build>
 
 
