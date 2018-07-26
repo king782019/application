@@ -1,1 +1,1 @@
-web: java -jar target/cloud.jar
+web: java -Dserver.port=$PORT -jar target/cloud-0.0.1-SNAPSHOT.jar
