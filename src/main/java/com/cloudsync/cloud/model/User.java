@@ -20,8 +20,78 @@ public class User {
     @NotEmpty
     private String password;
 
-    private String passwordConfirm;
-    private Set<Role> roles;
+    private String googleAccount;
+    private String googleToken;
+    private String dropboxAccount;
+    private String dropboxToken;
+    private String boxAccount;
+    private String boxToken;
+    private String onedriveAccount;
+    private String onedriveToken;
+
+    public String getGoogleAccount() {
+        return googleAccount;
+    }
+
+    public void setGoogleAccount(String googleAccount) {
+        this.googleAccount = googleAccount;
+    }
+
+    public String getGoogleToken() {
+        return googleToken;
+    }
+
+    public void setGoogleToken(String googleToken) {
+        this.googleToken = googleToken;
+    }
+
+    public String getDropboxAccount() {
+        return dropboxAccount;
+    }
+
+    public void setDropboxAccount(String dropboxAccount) {
+        this.dropboxAccount = dropboxAccount;
+    }
+
+    public String getDropboxToken() {
+        return dropboxToken;
+    }
+
+    public void setDropboxToken(String dropboxToken) {
+        this.dropboxToken = dropboxToken;
+    }
+
+    public String getBoxAccount() {
+        return boxAccount;
+    }
+
+    public void setBoxAccount(String boxAccount) {
+        this.boxAccount = boxAccount;
+    }
+
+    public String getBoxToken() {
+        return boxToken;
+    }
+
+    public void setBoxToken(String boxToken) {
+        this.boxToken = boxToken;
+    }
+
+    public String getOnedriveAccount() {
+        return onedriveAccount;
+    }
+
+    public void setOnedriveAccount(String onedriveAccount) {
+        this.onedriveAccount = onedriveAccount;
+    }
+
+    public String getOnedriveToken() {
+        return onedriveToken;
+    }
+
+    public void setOnedriveToken(String onedriveToken) {
+        this.onedriveToken = onedriveToken;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,21 +122,4 @@ public class User {
         this.password = password;
     }
 
-    @Transient
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
-    }
-    @ManyToMany
-    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
 }

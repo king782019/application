@@ -4,17 +4,50 @@
       xmlns:th="http://www.thymeleaf.org"
 >
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+
     <title>Title</title>
+
+    <style>
+        .login-form-1 {
+            max-width: 300px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn{
+            height: 50px;
+        }
+        .float{
+            margin-top:10px;
+        }
+    </style>
 </head>
 <body>
-<p th:if="${param.error}">Invalid Login or Password</p>
-<p th:if="${param.logout}">Logout successful!</p>
-<form th:action="@{/login}" method="post">
-    <input type="text" id="username" name="username"/>
-    <input type="password" id="password" name="password"/>
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-    <input type="submit"/>
-</form>
+<div class="text-center" style="padding: 50px 0">
+    <div class="logo">Login</div>
+    <div class="login-form-1">
+
+    <p th:if="${param.error}">Invalid Login or Password</p>
+    <p th:if="${param.logout}">Logout successful!</p>
+    <form id="login-form" class="text-left" th:action="@{/login}" method="post">
+        <input type="text" class="form-control float" id="username" name="username" placeholder="username"/>
+        <input type="password" class="form-control float" id="password" name="password" placeholder="password"/>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <button type="submit" class="btn btn-lg btn-primary btn-block btn-signin float">Log in</button>
+    </form>
+        <p>or
+            <a href="/signup">Sign Up</a></p>
+    </div>
+
+</div>
+<!-- Scripts for Bootstrap 4 -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
 </body>
 </html>

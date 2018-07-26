@@ -65,8 +65,15 @@ public class UserController {
     @RequestMapping(value = "/")
     public String index(Model model, Authentication user) {
         UserDetails userDetails = (UserDetails)user.getPrincipal();
-        model.addAttribute("user", userDetails.getUsername());
-        model.addAttribute("password", userDetails.getPassword());
+        User currentUser = userRepository.findByUsername(userDetails.getUsername());
+        Boolean google = (currentUser.getGoogleAccount() != null) ? true : false;
+        Boolean dropbox = (currentUser.getDropboxAccount() != null) ? true : false;
+        Boolean onedrive = (currentUser.getOnedriveAccount() != null) ? true : false;
+        Boolean box = (currentUser.getBoxAccount() != null) ? true : false;
+        model.addAttribute("googleExists", google);
+        model.addAttribute("dropboxExists", dropbox);
+        model.addAttribute("onedriveExists", onedrive);
+        model.addAttribute("boxExists", box);
         return "index";
     }
 
@@ -76,6 +83,7 @@ public class UserController {
         if(auth != null) {
             new SecurityContextLogoutHandler().logout(req, res, auth);
         }
+        System.out.println("logout");
         return "redirect:/login?logout";
     }
 
