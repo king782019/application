@@ -31,7 +31,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <p>Choose source account:</p>
+            <p><b>Choose source account:</b></p>
         <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">Google Drive</input></br>
 
         <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">DropBox</input></br>
@@ -42,7 +42,7 @@
 
 
         <div class="col">
-            <p>Choose destination account:</p>
+            <p><b>Choose destination account:</b></p>
             <input type="radio" name="destinationGroup" id="d1" value="1" th:if="${googleExists}">Google Drive</input></br>
             <input type="radio" name="destinationGroup" id="d2" value="2" th:if="${dropboxExists}">DropBox</input></br>
             <input type="radio" name="destinationGroup" id="d3" value="3" th:if="${onedriveExists}">OneDrive</input></br>
@@ -52,11 +52,49 @@
 
         </div>
     </div>
+    <div class="row">
+        <div class="col-4">
     <button class="btn btn-outline-success" id="sync"><b>One-way sync</b></button>
+        </div>
+        <div class="col-4">
     <button class="btn btn-outline-success" id="twowaysync"><b>Two-way sync</b></button>
-    <div class="sync"></div>
-    <div class="message"></div>
-
+    </div>
+        <div class="col-4">
+            <div class="sync"></div>
+            <div class="message"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h2>View files:</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+    <button class="createTableGoogle btn btn-outline-primary">Google Drive</button>
+        </div>
+        <div class="col-2">
+    <button class="createTableDropbox btn btn-outline-primary">Dropbox</button>
+        </div>
+            <div class="col-2">
+    <button class="createTableOnedrive btn btn-outline-primary">OneDrive</button>
+            </div>
+                <div class="col-2">
+    <button class="createTableBox btn btn-outline-primary">Box</button>
+                </div>
+    </div>
+    <div class="row">
+    <table class="tableView table">
+        <thead class="thead-dark">
+            <tr>
+                <th>
+                    File name
+                </th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    </div>
 </div>
 </body>
 </html>

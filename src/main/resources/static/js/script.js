@@ -7,11 +7,87 @@ var obj = {
 
 $("#s1, #s2, #s3, #s4").change(function() {
     obj.source = $("input[name=sourceGroup]:checked").val();
-})
+});
 
 $( "#d1, #d2, #d3, #d4" ).change(function() {
     obj.destination = $("input[name=destinationGroup]:checked").val();
 });
+
+$(".createTableGoogle").click(function() {
+    $(".tableView tbody tr").remove();
+    $.ajax({
+        url: '/getFilesGoogle',
+        type: 'GET',
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(res) {
+            console.log(res);
+            var i = 0;
+            for(; i < res.objects.length; i++) {
+                if(res.objects[i].type === "file") {
+                    $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+                }
+            }
+        }
+    })
+});
+
+    $(".createTableDropbox").click(function() {
+        $(".tableView tbody tr").remove();
+        $.ajax({
+            url: '/getFilesDropbox',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(res) {
+                console.log(res);
+                var i = 0;
+                for(; i < res.objects.length; i++) {
+                    if(res.objects[i].type === "file") {
+                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+                    }
+                }
+            }
+        })
+    });
+
+    $(".createTableOnedrive").click(function() {
+        $(".tableView tbody tr").remove();
+        $.ajax({
+            url: '/getFilesOnedrive',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(res) {
+                console.log(res);
+                var i = 0;
+                for(; i < res.objects.length; i++) {
+                    if(res.objects[i].type === "file") {
+                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+                    }
+                }
+            }
+        })
+    });
+
+    $(".createTableBox").click(function() {
+        $(".tableView tbody tr").remove();
+        $.ajax({
+            url: '/getFilesBox',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(res) {
+                console.log(res);
+                var i = 0;
+                for(; i < res.objects.length; i++) {
+                    if(res.objects[i].type === "file") {
+                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+                    }
+                }
+            }
+        })
+    });
 
 $("#sync").click(function() {
     $(".message").text("")
@@ -127,4 +203,7 @@ $(function() {
 
     });
 })
+
 });
+
+

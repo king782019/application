@@ -96,6 +96,54 @@ public class CloudController {
         return "added";
     }
 
+    @RequestMapping(value = "/getFilesGoogle", method = RequestMethod.GET)
+    @ResponseBody
+    public MetadataCollection getFilesGoogle(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+
+        return metadataCollection;
+    }
+
+    @RequestMapping(value = "/getFilesDropbox", method = RequestMethod.GET)
+    @ResponseBody
+    public MetadataCollection getFilesDropbox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+
+        return metadataCollection;
+    }
+
+    @RequestMapping(value = "/getFilesOnedrive", method = RequestMethod.GET)
+    @ResponseBody
+    public MetadataCollection getFilesOnedrive(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+
+        return metadataCollection;
+    }
+
+    @RequestMapping(value = "/getFilesBox", method = RequestMethod.GET)
+    @ResponseBody
+    public MetadataCollection getFilesBox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+
+        return metadataCollection;
+    }
+
 
     @RequestMapping(value = "/sync", method = RequestMethod.POST)
     @ResponseBody
