@@ -21,7 +21,7 @@ $(".createTableGoogle").click(function() {
         contentType: 'application/json',
         dataType: 'json',
         success: function(res) {
-            console.log(res);
+            $(".tableView tbody tr").remove();
             var i = 0;
             for(; i < res.objects.length; i++) {
                 if(res.objects[i].type === "file") {
@@ -40,7 +40,7 @@ $(".createTableGoogle").click(function() {
             contentType: 'application/json',
             dataType: 'json',
             success: function(res) {
-                console.log(res);
+                $(".tableView tbody tr").remove();
                 var i = 0;
                 for(; i < res.objects.length; i++) {
                     if(res.objects[i].type === "file") {
@@ -59,7 +59,7 @@ $(".createTableGoogle").click(function() {
             contentType: 'application/json',
             dataType: 'json',
             success: function(res) {
-                console.log(res);
+                $(".tableView tbody tr").remove();
                 var i = 0;
                 for(; i < res.objects.length; i++) {
                     if(res.objects[i].type === "file") {
@@ -78,7 +78,7 @@ $(".createTableGoogle").click(function() {
             contentType: 'application/json',
             dataType: 'json',
             success: function(res) {
-                console.log(res);
+                $(".tableView tbody tr").remove();
                 var i = 0;
                 for(; i < res.objects.length; i++) {
                     if(res.objects[i].type === "file") {
