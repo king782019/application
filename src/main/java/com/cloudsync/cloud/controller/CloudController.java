@@ -1,6 +1,7 @@
 package com.cloudsync.cloud.controller;
 
-import com.cloudsync.cloud.model.*;
+import com.cloudsync.cloud.model.Provider;
+import com.cloudsync.cloud.model.SyncAccount;
 import com.cloudsync.cloud.model.User;
 import com.cloudsync.cloud.repository.UserRepository;
 import com.kloudless.KClient;
@@ -9,7 +10,9 @@ import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
-import com.kloudless.model.*;
+import com.kloudless.model.Folder;
+import com.kloudless.model.Metadata;
+import com.kloudless.model.MetadataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,7 +44,7 @@ public class CloudController {
             currentUser.setGoogleAccount(provider.getAccount().getId());
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
-        } catch(UsernameNotFoundException err) {
+        } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
         }
@@ -57,7 +60,7 @@ public class CloudController {
             currentUser.setDropboxAccount(provider.getAccount().getId());
             currentUser.setDropboxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-        } catch(UsernameNotFoundException err) {
+        } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
         }
@@ -73,7 +76,7 @@ public class CloudController {
             currentUser.setOnedriveAccount(provider.getAccount().getId());
             currentUser.setOnedriveToken(provider.getAccessToken());
             userRepository.save(currentUser);
-        } catch(UsernameNotFoundException err) {
+        } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
         }
@@ -89,7 +92,7 @@ public class CloudController {
             currentUser.setBoxAccount(provider.getAccount().getId());
             currentUser.setBoxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-        } catch(UsernameNotFoundException err) {
+        } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
         }
@@ -99,7 +102,7 @@ public class CloudController {
     @RequestMapping(value = "/getFilesGoogle", method = RequestMethod.GET)
     @ResponseBody
     public MetadataCollection getFilesGoogle(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
@@ -111,7 +114,7 @@ public class CloudController {
     @RequestMapping(value = "/getFilesDropbox", method = RequestMethod.GET)
     @ResponseBody
     public MetadataCollection getFilesDropbox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
@@ -123,7 +126,7 @@ public class CloudController {
     @RequestMapping(value = "/getFilesOnedrive", method = RequestMethod.GET)
     @ResponseBody
     public MetadataCollection getFilesOnedrive(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
@@ -135,7 +138,7 @@ public class CloudController {
     @RequestMapping(value = "/getFilesBox", method = RequestMethod.GET)
     @ResponseBody
     public MetadataCollection getFilesBox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
@@ -149,9 +152,9 @@ public class CloudController {
     @ResponseBody
     public Authentication sync(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
-        switch(syncAccount.getSource()){
+        switch (syncAccount.getSource()) {
             case 1:
                 sourceAccount = user.getGoogleAccount();
                 sourceToken = user.getGoogleToken();
@@ -172,7 +175,7 @@ public class CloudController {
                 return null;
         }
 
-        switch(syncAccount.getDestination()){
+        switch (syncAccount.getDestination()) {
             case 1:
                 destinationAccount = user.getGoogleAccount();
                 destinationToken = user.getGoogleToken();
@@ -199,22 +202,22 @@ public class CloudController {
         MetadataCollection dCollection = destinationStorage.contents(null, Folder.class, "root");
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
-        for(Metadata file : dCollection.objects) {
-            if(file.type.equals("file")) {
-                if(!sCollection.objects.contains(file)){
+        for (Metadata file : dCollection.objects) {
+            if (file.type.equals("file")) {
+                if (!sCollection.objects.contains(file)) {
                     destinationStorage.delete(null, com.kloudless.model.File.class, file.id);
                 }
             }
         }
 
-        for(Metadata file : sCollection.objects) {
-            if(file.type.equals("file")) {
-                if(!dCollection.objects.contains(file)) {
+        for (Metadata file : sCollection.objects) {
+            if (file.type.equals("file")) {
+                if (!dCollection.objects.contains(file)) {
                     HashMap<String, Object> fileParams = new HashMap<>();
                     fileParams.put("parent_id", "root");
                     fileParams.put("name", file.name);
                     fileParams.put("account", destinationAccount);
-                    com.kloudless.model.File.copy(file.id, sourceAccount,fileParams);
+                    com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
                 }
             }
         }
@@ -226,9 +229,9 @@ public class CloudController {
     @ResponseBody
     public Authentication twoWaySync(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
-        switch(syncAccount.getSource()){
+        switch (syncAccount.getSource()) {
             case 1:
                 sourceAccount = user.getGoogleAccount();
                 sourceToken = user.getGoogleToken();
@@ -249,7 +252,7 @@ public class CloudController {
                 return null;
         }
 
-        switch(syncAccount.getDestination()){
+        switch (syncAccount.getDestination()) {
             case 1:
                 destinationAccount = user.getGoogleAccount();
                 destinationToken = user.getGoogleToken();
@@ -276,26 +279,26 @@ public class CloudController {
         MetadataCollection dCollection = destinationStorage.contents(null, Folder.class, "root");
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
-        for(Metadata file : dCollection.objects) {
-            if(file.type.equals("file")) {
-                if(!sCollection.objects.contains(file)) {
+        for (Metadata file : dCollection.objects) {
+            if (file.type.equals("file")) {
+                if (!sCollection.objects.contains(file)) {
                     HashMap<String, Object> fileParams = new HashMap<>();
                     fileParams.put("parent_id", "root");
                     fileParams.put("name", file.name);
                     fileParams.put("account", sourceAccount);
-                    com.kloudless.model.File.copy(file.id, destinationAccount,fileParams);
+                    com.kloudless.model.File.copy(file.id, destinationAccount, fileParams);
                 }
             }
         }
 
-        for(Metadata file : sCollection.objects) {
-            if(file.type.equals("file")) {
-                if(!dCollection.objects.contains(file)) {
+        for (Metadata file : sCollection.objects) {
+            if (file.type.equals("file")) {
+                if (!dCollection.objects.contains(file)) {
                     HashMap<String, Object> fileParams = new HashMap<>();
                     fileParams.put("parent_id", "root");
                     fileParams.put("name", file.name);
                     fileParams.put("account", destinationAccount);
-                    com.kloudless.model.File.copy(file.id, sourceAccount,fileParams);
+                    com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
                 }
             }
         }

@@ -16,6 +16,7 @@ public class Provider {
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
+
     @JsonProperty("account")
     public Account getAccount() {
         return account;
