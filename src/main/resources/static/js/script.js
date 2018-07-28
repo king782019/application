@@ -15,6 +15,7 @@ $(document).ready(function () {
 
     $(".createTableGoogle").click(function () {
         $(".tableView tbody tr").remove();
+        $(".tableView thead").loading();
         $.ajax({
             url: '/getFilesGoogle',
             type: 'GET',
@@ -22,6 +23,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (res) {
                 $(".tableView tbody tr").remove();
+                $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
                     if (res.objects[i].type === "file") {
@@ -34,6 +36,7 @@ $(document).ready(function () {
 
     $(".createTableDropbox").click(function () {
         $(".tableView tbody tr").remove();
+        $(".tableView thead").loading();
         $.ajax({
             url: '/getFilesDropbox',
             type: 'GET',
@@ -41,6 +44,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (res) {
                 $(".tableView tbody tr").remove();
+                $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
                     if (res.objects[i].type === "file") {
@@ -53,6 +57,7 @@ $(document).ready(function () {
 
     $(".createTableOnedrive").click(function () {
         $(".tableView tbody tr").remove();
+        $(".tableView thead").loading();
         $.ajax({
             url: '/getFilesOnedrive',
             type: 'GET',
@@ -60,6 +65,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (res) {
                 $(".tableView tbody tr").remove();
+                $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
                     if (res.objects[i].type === "file") {
@@ -72,6 +78,7 @@ $(document).ready(function () {
 
     $(".createTableBox").click(function () {
         $(".tableView tbody tr").remove();
+        $(".tableView thead").loading();
         $.ajax({
             url: '/getFilesBox',
             type: 'GET',
@@ -79,6 +86,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (res) {
                 $(".tableView tbody tr").remove();
+                $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
                     if (res.objects[i].type === "file") {
@@ -89,12 +97,16 @@ $(document).ready(function () {
         })
     });
 
+
+
     $("#sync").click(function () {
         $(".message").text("")
+
         if (obj.source != 0 && obj.destination != 0) {
             if (obj.source == obj.destination) {
                 $(".message").text("Source and destination are same");
             } else {
+                $(".message").loading();
                 $.ajax({
                     url: '/sync',
                     type: 'POST',
@@ -102,6 +114,7 @@ $(document).ready(function () {
                     data: JSON.stringify(obj),
                     dataType: 'json',
                     success: function (data) {
+                        $(".message").loading('stop');
                         $(".message").text("Synchronized");
 
                     },
@@ -118,6 +131,7 @@ $(document).ready(function () {
             if (obj.source == obj.destination) {
                 $(".message").text("Source and destination are same");
             } else {
+                $(".message").loading();
                 $.ajax({
                     url: '/twowaysync',
                     type: 'POST',
@@ -125,6 +139,7 @@ $(document).ready(function () {
                     data: JSON.stringify(obj),
                     dataType: 'json',
                     success: function (data) {
+                        $(".message").loading('stop');
                         $(".message").text("Synchronized");
 
                     },
