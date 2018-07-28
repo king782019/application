@@ -26,13 +26,15 @@
 </head>
 <body>
 <div class="container">
+    <div class="row">
 
-    <div class="row justify-content-between">
+    </div>
+    <div class="row justify-content-between outline-menu">
         <div class="col-10">
             <button class="btn btn-primary" id="test">Add new provider</button>
             </br>
         </div>
-        <div class="col-2">
+        <div class="col-2 d-flex justify-content-end">
             <a class="btn btn-outline-danger" href="/logout" role="button"><b>Logout</b></a>
         </div>
     </div>
@@ -93,16 +95,19 @@
         </div>
     </div>
     <div class="row">
-        <table class="tableView table">
-            <thead class="thead-dark">
-            <tr>
-                <th>
-                    File name
-                </th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="col">
+            <table class="tableView table">
+                <thead class="thead-dark">
+                <tr>
+                    <th>
+                        File name
+                    </th>
+
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 </body>
