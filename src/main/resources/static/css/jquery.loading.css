@@ -10,26 +10,26 @@
 /* You don't need to include it if you're working with your custom overlay loader element */
 
 .loading-overlay {
-  display: table;
-  opacity: 0.7;
+    display: table;
+    opacity: 0.7;
 }
 
 .loading-overlay-content {
-  text-transform: uppercase;
-  letter-spacing: 0.4em;
-  font-size: 1.15em;
-  font-weight: bold;
-  text-align: center;
-  display: table-cell;
-  vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    font-size: 1.15em;
+    font-weight: bold;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
 }
 
 .loading-overlay.loading-theme-light {
-  background-color: #fff;
-  color: #000;
+    background-color: #fff;
+    color: #000;
 }
 
 .loading-overlay.loading-theme-dark {
-  background-color: #000;
-  color: #fff;
+    background-color: #000;
+    color: #fff;
 }

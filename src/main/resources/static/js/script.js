@@ -98,7 +98,6 @@ $(document).ready(function () {
     });
 
 
-
     $("#sync").click(function () {
         $(".message").text("")
 
