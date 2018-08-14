@@ -107,12 +107,13 @@ $(document).ready(function () {
             } else {
                 $(".message").loading();
                 $.ajax({
-                    url: '/sync',
+                    url: '/synco',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(obj),
                     dataType: 'json',
                     success: function (data) {
+                        console.log(data);
                         $(".message").loading('stop');
                         $(".message").text("Synchronized");
 
@@ -132,7 +133,7 @@ $(document).ready(function () {
             } else {
                 $(".message").loading();
                 $.ajax({
-                    url: '/twowaysync',
+                    url: '/twowaysynco',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(obj),
