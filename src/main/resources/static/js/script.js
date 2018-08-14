@@ -28,9 +28,6 @@ $(document).ready(function () {
                 var i = 0;
                 for (; i < res.objects.length; i++) {
 
-                        $(".tableView tbody").append("<tr><td>"+ res.objects[i].name +"</td></tr>")
-
-
                     $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
 
                 }
