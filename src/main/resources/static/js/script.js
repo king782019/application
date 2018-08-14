@@ -13,6 +13,7 @@ $(document).ready(function () {
         obj.destination = $("input[name=destinationGroup]:checked").val();
     });
 
+
     $(".createTableGoogle").click(function () {
         $(".tableView tbody tr").remove();
         $(".tableView thead").loading();
@@ -26,9 +27,12 @@ $(document).ready(function () {
                 $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
-                    if (res.objects[i].type === "file") {
-                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
-                    }
+
+                        $(".tableView tbody").append("<tr><td>"+ res.objects[i].name +"</td></tr>")
+
+
+                    $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+
                 }
             }
         })
@@ -47,9 +51,8 @@ $(document).ready(function () {
                 $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
-                    if (res.objects[i].type === "file") {
-                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
-                    }
+                    $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+
                 }
             }
         })
@@ -68,9 +71,9 @@ $(document).ready(function () {
                 $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
-                    if (res.objects[i].type === "file") {
-                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
-                    }
+
+                    $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+
                 }
             }
         })
@@ -89,9 +92,9 @@ $(document).ready(function () {
                 $(".tableView thead").loading('stop');
                 var i = 0;
                 for (; i < res.objects.length; i++) {
-                    if (res.objects[i].type === "file") {
-                        $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
-                    }
+
+                    $(".tableView tbody").append("<tr><td>" + res.objects[i].name + "</td></tr>")
+
                 }
             }
         })

@@ -119,6 +119,39 @@ public class CloudController {
         KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
 
+        Integer num = null;
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+        num = null;
+
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+
+                num = i;
+            }
+        }
+
+
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+
 
         return metadataCollection;
     }
@@ -130,6 +163,39 @@ public class CloudController {
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+        Integer num = null;
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+        num = null;
+
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+
+                num = i;
+            }
+        }
+
+
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
 
 
         return metadataCollection;
@@ -143,6 +209,39 @@ public class CloudController {
         KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
 
+        Integer num = null;
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+        num = null;
+
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+
+                num = i;
+            }
+        }
+
+
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+
 
         return metadataCollection;
     }
@@ -154,6 +253,39 @@ public class CloudController {
         User user = userRepository.findByUsername(userDetails.getUsername());
         KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+
+        Integer num = null;
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
+        num = null;
+
+        for (int i = 0; i < metadataCollection.objects.size(); i++) {
+
+            metadataCollection.objects.get(i).parent.Id = "root";
+            metadataCollection.objects.get(i).parent.name = "root";
+
+            if (metadataCollection.objects.get(i).name.equals("Shared with me") || metadataCollection.objects.get(i).raw_id.equals("shared_items")) {
+
+                num = i;
+            }
+        }
+
+
+        if (num != null) {
+            int ind = num;
+            metadataCollection.objects.remove(ind);
+        }
 
 
         return metadataCollection;
