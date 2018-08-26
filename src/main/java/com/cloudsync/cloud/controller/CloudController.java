@@ -37,11 +37,16 @@ public class CloudController {
 
     private static final Logger logger = LogManager.getLogger(CloudController.class);
 
+    final UserRepository userRepository;
+
     @Autowired
-    UserRepository userRepository;
+    public CloudController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     //====================Add providers=========================
+
 
     @RequestMapping(value = "/addServiceGoogle", method = RequestMethod.POST)
     @ResponseBody
@@ -56,7 +61,7 @@ public class CloudController {
             err.printStackTrace();
             return null;
         }
-        return "added";
+        return "OK";
     }
 
     @RequestMapping(value = "/addServiceDropbox", method = RequestMethod.POST)
@@ -72,7 +77,7 @@ public class CloudController {
             err.printStackTrace();
             return null;
         }
-        return "added";
+        return "OK";
     }
 
     @RequestMapping(value = "/addServiceOnedrive", method = RequestMethod.POST)
@@ -88,7 +93,7 @@ public class CloudController {
             err.printStackTrace();
             return null;
         }
-        return "added";
+        return "OK";
     }
 
     @RequestMapping(value = "/addServiceBox", method = RequestMethod.POST)
@@ -104,7 +109,7 @@ public class CloudController {
             err.printStackTrace();
             return null;
         }
-        return "added";
+        return "OK";
     }
 
     //====================Add providers=========================
@@ -693,10 +698,11 @@ public class CloudController {
                         fileParams.put("parent_id", "root");
                     }
                     Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
+                    logger.debug(String.format("Folder %s created in destination storage from first try", metadata.name));
                     if (fileParams.get("parent_id").equals("root")) {
                         metadata.parent.name = "root";
                     } else {
-                        metadata.parent.name = fileParams.get("name").toString();
+                        metadata.parent.name = mData.parent.name;
                     }
                     destinationList.getMetadataList().add(metadata);
 
@@ -720,10 +726,11 @@ public class CloudController {
                                 fileParams.put("parent_id", "root");
                             }
                             Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
+                            logger.debug(String.format("Folder %s created in destination storage from second try", metadata.name));
                             if (fileParams.get("parent_id").equals("root")) {
                                 metadata.parent.name = "root";
                             } else {
-                                metadata.parent.name = fileParams.get("name").toString();
+                                metadata.parent.name = mData.parent.name;
                             }
                             destinationList.getMetadataList().add(metadata);
                             break;
@@ -753,6 +760,7 @@ public class CloudController {
                         fileParams.put("parent_id", "root");
                     }
                     Metadata metadata = sourceStorage.create(null, Folder.class, fileParams);
+                    logger.debug(String.format("Folder %s created in source storage from first try", metadata.name));
                     if (fileParams.get("parent_id").equals("root")) {
                         metadata.parent.name = "root";
                     } else {
@@ -781,6 +789,7 @@ public class CloudController {
                                 fileParams.put("parent_id", "root");
                             }
                             Metadata metadata = sourceStorage.create(null, Folder.class, fileParams);
+                            logger.debug(String.format("Folder %s created in source storage from second try", metadata.name));
                             if (fileParams.get("parent_id").equals("root")) {
                                 metadata.parent.name = "root";
                             } else {

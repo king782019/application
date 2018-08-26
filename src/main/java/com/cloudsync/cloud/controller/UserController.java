@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -24,14 +25,18 @@ import javax.validation.Valid;
 @Controller
 public class UserController {
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    final PasswordEncoder passwordEncoder;
+
+    final UserRepository userRepository;
+
+    final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
+    public UserController(PasswordEncoder passwordEncoder, UserRepository userRepository, UserDetailsServiceImpl userDetailsService) {
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.userDetailsService = userDetailsService;
+    }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login() {
@@ -63,10 +68,10 @@ public class UserController {
     public String index(Model model, Authentication user) {
         UserDetails userDetails = (UserDetails) user.getPrincipal();
         User currentUser = userRepository.findByUsername(userDetails.getUsername());
-        Boolean google = (currentUser.getGoogleAccount() != null) ? true : false;
-        Boolean dropbox = (currentUser.getDropboxAccount() != null) ? true : false;
-        Boolean onedrive = (currentUser.getOnedriveAccount() != null) ? true : false;
-        Boolean box = (currentUser.getBoxAccount() != null) ? true : false;
+        Boolean google = currentUser.getGoogleAccount() != null;
+        Boolean dropbox = currentUser.getDropboxAccount() != null;
+        Boolean onedrive = currentUser.getOnedriveAccount() != null;
+        Boolean box = currentUser.getBoxAccount() != null;
         model.addAttribute("googleExists", google);
         model.addAttribute("dropboxExists", dropbox);
         model.addAttribute("onedriveExists", onedrive);
