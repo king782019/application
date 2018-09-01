@@ -114,6 +114,67 @@ public class CloudController {
 
     //====================Add providers=========================
 
+    //=====================Check availability===================
+
+
+
+    //=====================Check availability===================
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(value = "/getStatusGoogle", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStatusGoogle(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if(user.getGoogleAccount() == null) {
+            return "Not found";
+        }
+        KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(value = "/getStatusDropbox", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStatusDropbox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if(user.getDropboxAccount() == null) {
+            return "Not found";
+        }
+        KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(value = "/getStatusOnedrive", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStatusOnedrive(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if(user.getOnedriveAccount() == null) {
+            return "Not found";
+        }
+        KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    @RequestMapping(value = "/getStatusBox", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStatusBox(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if(user.getBoxAccount() == null) {
+            return "Not found";
+        }
+        KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
+        MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
+        return "OK";
+    }
+
     //====================Get files============================
 
     @RequestMapping(value = "/getFilesGoogle", method = RequestMethod.GET)
@@ -121,6 +182,7 @@ public class CloudController {
     public MetadataCollection getFilesGoogle(Authentication auth) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
+
         KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
         MetadataCollection metadataCollection = storage.contents(null, Folder.class, "root");
 

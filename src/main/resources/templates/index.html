@@ -46,6 +46,7 @@
             <a class="btn btn-outline-danger" href="/logout" role="button"><b>Logout</b></a>
         </div>
     </div>
+
     <div class="row">
         <div class="col">
             <p><b>Choose source account:</b></p>
@@ -68,6 +69,24 @@
             <input type="radio" name="destinationGroup" id="d4" value="4" th:if="${boxExists}">Box</input></br>
         </div>
         <div class="col">
+
+
+            <p><b>Provider availability:</b></p>
+
+
+            <p class="googleStatus">Google: </p>
+
+
+            <p class="dropboxStatus">DropBox: </p>
+
+
+            <p class="onedriveStatus">OneDrive: </p>
+
+
+            <p class="boxStatus">Box: </p>
+            <p class="lastTimeChecked"></p>
+            <button class="btn btn-primary btn-status">Check status</button>
+
 
         </div>
     </div>
@@ -117,6 +136,9 @@
             </table>
         </div>
     </div>
+
+
+
 </div>
 </body>
 </html>

@@ -13,6 +13,93 @@ $(document).ready(function () {
         obj.destination = $("input[name=destinationGroup]:checked").val();
     });
 
+    $(".btn-status").click(function () {
+        checkStatusGoogle();
+        checkStatusDropbox();
+        checkStatusOnedrive();
+        checkStatusBox();
+
+        var hours = new Date().getHours();
+        var minutes = new Date().getMinutes();
+        var seconds = new Date().getSeconds();
+        $(".lastTimeChecked").text("Last time checked: " + hours + ":" + minutes + ":" + seconds);
+    });
+
+    function checkStatusGoogle() {
+        $.ajax({
+            url:'/getStatusGoogle',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'text',
+            success: function(res) {
+                if(res === "OK") {
+                    $(".googleStatus").text("Google:  OK");
+                } else {
+                    $(".googleStatus").text("Google:  Not found");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $(".googleStatus").text("Google:  Not available");
+            }
+        })
+    }
+
+    function checkStatusDropbox() {
+        $.ajax({
+            url:'/getStatusDropbox',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'text',
+            success: function(res) {
+                if(res === "OK") {
+                    $(".dropboxStatus").text("DropBox:  OK");
+                } else {
+                    $(".dropboxStatus").text("DropBox:  Not found");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $(".dropboxStatus").text("DropBox:  Not available");
+            }
+        })
+    }
+
+    function checkStatusOnedrive() {
+        $.ajax({
+            url:'/getStatusOnedrive',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'text',
+            success: function(res) {
+                if(res === "OK") {
+                    $(".onedriveStatus").text("OneDrive:  OK");
+                } else {
+                    $(".onedriveStatus").text("OneDrive:  Not found");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $(".onedriveStatus").text("OneDrive:  Not available");
+            }
+        })
+    }
+
+    function checkStatusBox() {
+        $.ajax({
+            url:'/getStatusBox',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'text',
+            success: function(res) {
+                if(res === "OK") {
+                    $(".boxStatus").text("Box:  OK");
+                } else {
+                    $(".boxStatus").text("Box:  Not found");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $(".boxStatus").text("Box:  Not available");
+            }
+        })
+    }
 
     $(".createTableGoogle").click(function () {
         $(".tableView tbody tr").remove();

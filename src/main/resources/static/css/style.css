@@ -17,3 +17,7 @@ input {
     margin-right: 10px;
 }
 
+.inline-row {
+    display: inline;
+}
+
