@@ -888,6 +888,7 @@ public class CloudController {
                     }
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
+                    logger.debug(String.format("File %s created in destination storage", mData.name));
                 }
             }
         }
@@ -913,6 +914,7 @@ public class CloudController {
                     }
                     fileParams.put("account", sourceAccount);
                     com.kloudless.model.File.copy(mData.id, destinationAccount, fileParams);
+                    logger.debug(String.format("File %s created in source storage", mData.name));
                 }
             }
         }
