@@ -39,7 +39,7 @@
     <div class="row justify-content-between outline-menu">
         <div class="col-10 d-flex justify-content-start">
             <button class="btn btn-primary" id="test">Add new provider</button>
-            </br>
+            <br>
         </div>
 
         <div class="col-2 d-flex justify-content-end">
@@ -50,23 +50,23 @@
     <div class="row">
         <div class="col">
             <p><b>Choose source account:</b></p>
-            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">Google Drive</input></br>
+            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">Google Drive</input><br>
 
-            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">DropBox</input></br>
+            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">DropBox</input><br>
 
-            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">OneDrive</input></br>
-            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}">Box</input></br>
+            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">OneDrive</input><br>
+            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}">Box</input><br>
         </div>
 
 
         <div class="col">
             <p><b>Choose destination account:</b></p>
             <input type="radio" name="destinationGroup" id="d1" value="1" th:if="${googleExists}">Google
-            Drive</input></br>
-            <input type="radio" name="destinationGroup" id="d2" value="2" th:if="${dropboxExists}">DropBox</input></br>
+            Drive</input><br>
+            <input type="radio" name="destinationGroup" id="d2" value="2" th:if="${dropboxExists}">DropBox</input><br>
             <input type="radio" name="destinationGroup" id="d3" value="3"
                    th:if="${onedriveExists}">OneDrive</input></br>
-            <input type="radio" name="destinationGroup" id="d4" value="4" th:if="${boxExists}">Box</input></br>
+            <input type="radio" name="destinationGroup" id="d4" value="4" th:if="${boxExists}">Box</input><br>
         </div>
         <div class="col">
 

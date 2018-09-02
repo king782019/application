@@ -3,7 +3,7 @@ $(document).ready(function () {
     var obj = {
         source: 0,
         destination: 0
-    }
+    };
 
     $("#s1, #s2, #s3, #s4").change(function () {
         obj.source = $("input[name=sourceGroup]:checked").val();
@@ -186,7 +186,7 @@ $(document).ready(function () {
 
 
     $("#sync").click(function () {
-        $(".message").text("")
+        $(".message").text("");
 
         if (obj.source != 0 && obj.destination != 0) {
             if (obj.source == obj.destination) {
@@ -213,7 +213,7 @@ $(document).ready(function () {
     });
 
     $("#twowaysync").click(function () {
-        $(".message").text("")
+        $(".message").text("");
         if (obj.source != 0 && obj.destination != 0) {
             if (obj.source == obj.destination) {
                 $(".message").text("Source and destination are same");
