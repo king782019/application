@@ -27,6 +27,78 @@ public class User {
     private String boxToken;
     private String onedriveAccount;
     private String onedriveToken;
+    private String yandexAccount;
+    private String yandexToken;
+    private String hidriveAccount;
+    private String hidriveToken;
+    private String pcloudAccount;
+    private String pcloudToken;
+    private String cloudmeAccount;
+    private String cloudmeToken;
+
+    public String getCloudmeAccount() {
+        return cloudmeAccount;
+    }
+
+    public void setCloudmeAccount(String cloudmeAccount) {
+        this.cloudmeAccount = cloudmeAccount;
+    }
+
+    public String getCloudmeToken() {
+        return cloudmeToken;
+    }
+
+    public void setCloudmeToken(String cloudmeToken) {
+        this.cloudmeToken = cloudmeToken;
+    }
+
+    public String getPcloudAccount() {
+        return pcloudAccount;
+    }
+
+    public void setPcloudAccount(String pcloudAccount) {
+        this.pcloudAccount = pcloudAccount;
+    }
+
+    public String getPcloudToken() {
+        return pcloudToken;
+    }
+
+    public void setPcloudToken(String pcloudToken) {
+        this.pcloudToken = pcloudToken;
+    }
+
+    public String getHidriveAccount() {
+        return hidriveAccount;
+    }
+
+    public void setHidriveAccount(String hidriveAccount) {
+        this.hidriveAccount = hidriveAccount;
+    }
+
+    public String getHidriveToken() {
+        return hidriveToken;
+    }
+
+    public void setHidriveToken(String hidriveToken) {
+        this.hidriveToken = hidriveToken;
+    }
+
+    public String getYandexAccount() {
+        return yandexAccount;
+    }
+
+    public void setYandexAccount(String yandexAccount) {
+        this.yandexAccount = yandexAccount;
+    }
+
+    public String getYandexToken() {
+        return yandexToken;
+    }
+
+    public void setYandexToken(String yandexToken) {
+        this.yandexToken = yandexToken;
+    }
 
     public String getGoogleAccount() {
         return googleAccount;

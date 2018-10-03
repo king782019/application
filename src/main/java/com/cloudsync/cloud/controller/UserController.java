@@ -72,10 +72,16 @@ public class UserController {
         Boolean dropbox = currentUser.getDropboxAccount() != null;
         Boolean onedrive = currentUser.getOnedriveAccount() != null;
         Boolean box = currentUser.getBoxAccount() != null;
+        Boolean yandex = currentUser.getYandexAccount() != null;
+        Boolean hidrive = currentUser.getHidriveAccount() != null;
+        Boolean pcloud = currentUser.getPcloudAccount() != null;
         model.addAttribute("googleExists", google);
         model.addAttribute("dropboxExists", dropbox);
         model.addAttribute("onedriveExists", onedrive);
         model.addAttribute("boxExists", box);
+        model.addAttribute("yandexExists", yandex);
+        model.addAttribute("hidriveExists", hidrive);
+        model.addAttribute("pcloudExists", pcloud);
         return "index";
     }
 

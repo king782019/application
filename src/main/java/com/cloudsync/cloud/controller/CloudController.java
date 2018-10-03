@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -47,6 +48,67 @@ public class CloudController {
 
     //====================Add providers=========================
 
+    @RequestMapping(value = "/addWebDav", method = RequestMethod.POST)
+    @ResponseBody
+    public String addWebDav(@RequestBody Provider provider, Authentication auth) {
+        String tempAccountName = provider.getAccount().getAccount();
+        String accountName = tempAccountName.substring(tempAccountName.indexOf("@")+1);
+        accountName.trim();
+        if(!accountName.contains("@")) {
+            switch(accountName) {
+                case "webdav.yandex.ru":
+                    addServiceYandex(provider, auth);
+                    break;
+                case "webdav.hidrive.strato.com":
+                    addServiceHidrive(provider, auth);
+                    break;
+                case "webdav.pcloud.com":
+                    addServicePcloud(provider, auth);
+                    break;
+            }
+        } else {
+            String newAcc = accountName.substring(accountName.indexOf("@")+1);
+            switch(newAcc) {
+                case "webdav.pcloud.com":
+                    addServicePcloud(provider, auth);
+                    break;
+            }
+        }
+
+
+
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    private String addServicePcloud(Provider provider, Authentication auth) {
+        UserDetails user = (UserDetails) auth.getPrincipal();
+        User currentUser = userRepository.findByUsername(user.getUsername());
+        currentUser.setPcloudAccount(provider.getAccount().getId());
+        currentUser.setPcloudToken(provider.getAccessToken());
+        userRepository.save(currentUser);
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    private String addServiceHidrive(Provider provider, Authentication auth) {
+        UserDetails user = (UserDetails) auth.getPrincipal();
+        User currentUser = userRepository.findByUsername(user.getUsername());
+        currentUser.setHidriveAccount(provider.getAccount().getId());
+        currentUser.setHidriveToken(provider.getAccessToken());
+        userRepository.save(currentUser);
+        return "OK";
+    }
+
+    @SuppressWarnings("Duplicates")
+    private String addServiceYandex(Provider provider, Authentication auth) {
+        UserDetails user = (UserDetails) auth.getPrincipal();
+        User currentUser = userRepository.findByUsername(user.getUsername());
+        currentUser.setYandexAccount(provider.getAccount().getId());
+        currentUser.setYandexToken(provider.getAccessToken());
+        userRepository.save(currentUser);
+        return "OK";
+    }
 
     @RequestMapping(value = "/addServiceGoogle", method = RequestMethod.POST)
     @ResponseBody
@@ -381,6 +443,11 @@ public class CloudController {
     @ResponseBody
     public List<Metadata> synco(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
+        Boolean isHidriveS = false;
+        Boolean isHidriveD = false;
+
+        Metadata hidriveRoot = new Metadata();
+
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
@@ -400,6 +467,19 @@ public class CloudController {
             case 4:
                 sourceAccount = user.getBoxAccount();
                 sourceToken = user.getBoxToken();
+                break;
+            case 5:
+                sourceAccount = user.getYandexAccount();
+                sourceToken = user.getYandexToken();
+                break;
+            case 6:
+                sourceAccount = user.getHidriveAccount();
+                sourceToken = user.getHidriveToken();
+                isHidriveS = true;
+                break;
+            case 7:
+                sourceAccount = user.getPcloudAccount();
+                sourceToken= user.getPcloudToken();
                 break;
             default:
                 return null;
@@ -422,6 +502,19 @@ public class CloudController {
                 destinationAccount = user.getBoxAccount();
                 destinationToken = user.getBoxToken();
                 break;
+            case 5:
+                destinationAccount = user.getYandexAccount();
+                destinationToken = user.getYandexToken();
+                break;
+            case 6:
+                destinationAccount = user.getHidriveAccount();
+                destinationToken = user.getHidriveToken();
+                isHidriveD = true;
+                break;
+            case 7:
+                destinationAccount = user.getPcloudAccount();
+                destinationToken= user.getPcloudToken();
+                break;
             default:
                 return null;
         }
@@ -433,8 +526,11 @@ public class CloudController {
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
 
+
+
         MetadataCounter sourceList = new MetadataCounter(0, sCollection.objects);
         MetadataCounter destinationList = new MetadataCounter(0, dCollection.objects);
+
 
 
         Integer num = null;
@@ -453,10 +549,40 @@ public class CloudController {
             logger.debug("Shared with me folder deleted from source list");
         }
         num = null;
+        if(isHidriveD) {
+
+
+            for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                if(destinationList.getMetadataList().get(i).name.equals("public")) {
+
+                    hidriveRoot = destinationList.getMetadataList().get(i);
+
+                    break;
+                }
+            }
+            dCollection = destinationStorage.contents(null, Folder.class, hidriveRoot.id);
+            destinationList = new MetadataCounter(0, dCollection.objects);
+
+        }
+
+        if(isHidriveS) {
+
+            for(int i = 0; i < sourceList.getMetadataList().size(); i++) {
+                if(sourceList.getMetadataList().get(i).name.equals("public")) {
+
+                    hidriveRoot = sourceList.getMetadataList().get(i);
+
+                }
+            }
+            sCollection = sourceStorage.contents(null, Folder.class, hidriveRoot.id);
+            sourceList = new MetadataCounter(0, sCollection.objects);
+        }
+
 
         for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
 
             destinationList.getMetadataList().get(i).parent.Id = "root";
+
             destinationList.getMetadataList().get(i).parent.name = "root";
 
             if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
@@ -513,34 +639,36 @@ public class CloudController {
 
         List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
         Collections.reverse(reversed);
+        if(!isHidriveD) {
+            for (Metadata data : reversed) {
+                if (data.type.equals("folder")) {
+                    if (!sourceList.getMetadataList().contains(data)) {
 
-        for (Metadata data : reversed) {
-            if (data.type.equals("folder")) {
-                if (!sourceList.getMetadataList().contains(data)) {
-                    destinationStorage.delete(null, Folder.class, data.id);
-                    logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                            forRemove.add(destinationList.getMetadataList().get(i));
-                        }
-                    }
-
-                } else {
-                    for (Metadata file : sourceList.getMetadataList()) {
-                        if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                            destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
-                            logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
-                            for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                    forRemove.add(destinationList.getMetadataList().get(i));
-                                }
+                        destinationStorage.delete(null, Folder.class, data.id);
+                        logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
+                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                forRemove.add(destinationList.getMetadataList().get(i));
                             }
+                        }
 
+                    } else {
+                        for (Metadata file : sourceList.getMetadataList()) {
+                            if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
+                                destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
+                                logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
+                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                        forRemove.add(destinationList.getMetadataList().get(i));
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
-            }
 
+            }
         }
 
         destinationList.getMetadataList().removeAll(forRemove);
@@ -566,6 +694,9 @@ public class CloudController {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
+                        if(isHidriveD) {
+                            fileParams.put("parent_id", hidriveRoot.id);
+                        }
                     }
                     Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                     destinationList.getMetadataList().add(metadata);
@@ -589,6 +720,9 @@ public class CloudController {
                             fileParams.put("name", mData.name);
                             if (fileParams.size() <= 1) {
                                 fileParams.put("parent_id", "root");
+                                if(isHidriveD) {
+                                    fileParams.put("parent_id", hidriveRoot.id);
+                                }
                             }
                             Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                             destinationList.getMetadataList().add(metadata);
@@ -618,6 +752,9 @@ public class CloudController {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
+                        if(isHidriveD) {
+                            fileParams.put("parent_id", hidriveRoot.id);
+                        }
                     }
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
@@ -667,6 +804,10 @@ public class CloudController {
                 sourceAccount = user.getBoxAccount();
                 sourceToken = user.getBoxToken();
                 break;
+            case 5:
+                sourceAccount = user.getYandexAccount();
+                sourceToken = user.getYandexToken();
+                break;
             default:
                 return null;
         }
@@ -687,6 +828,10 @@ public class CloudController {
             case 4:
                 destinationAccount = user.getBoxAccount();
                 destinationToken = user.getBoxToken();
+                break;
+            case 5:
+                destinationAccount = user.getYandexAccount();
+                destinationToken = user.getYandexToken();
                 break;
             default:
                 return null;
@@ -941,6 +1086,9 @@ public class CloudController {
         int i = list.getCounter();
         for (; i < list.getMetadataList().size(); i++) {
             if (list.getMetadataList().get(i).type.equals("folder")) {
+                if (list.getMetadataList().get(i).name.equals(".hidrive")){
+                    continue;
+                }
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
