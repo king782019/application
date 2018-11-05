@@ -32,19 +32,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Controller
 public class CloudController {
 
     private static final Logger logger = LogManager.getLogger(CloudController.class);
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
 
     final UserRepository userRepository;
 
     @Autowired
-    public CloudController(UserRepository userRepository) {
+    public CloudController(UserRepository userRepository, ScheduledExecutorService scheduledExecutorService) {
         this.userRepository = userRepository;
+        this.scheduledExecutorService = scheduledExecutorService;
     }
-
 
     //====================Add providers=========================
 
