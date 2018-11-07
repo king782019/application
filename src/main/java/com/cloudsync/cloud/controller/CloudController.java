@@ -446,10 +446,6 @@ public class CloudController {
     @ResponseBody
     public List<Metadata> synco(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
-        Boolean isHidriveS = false;
-        Boolean isHidriveD = false;
-
-        Metadata hidriveRoot = new Metadata();
 
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
@@ -478,7 +474,6 @@ public class CloudController {
             case 6:
                 sourceAccount = user.getHidriveAccount();
                 sourceToken = user.getHidriveToken();
-                isHidriveS = true;
                 break;
             case 7:
                 sourceAccount = user.getPcloudAccount();
@@ -512,7 +507,6 @@ public class CloudController {
             case 6:
                 destinationAccount = user.getHidriveAccount();
                 destinationToken = user.getHidriveToken();
-                isHidriveD = true;
                 break;
             case 7:
                 destinationAccount = user.getPcloudAccount();
@@ -552,34 +546,7 @@ public class CloudController {
             logger.debug("Shared with me folder deleted from source list");
         }
         num = null;
-        if(isHidriveD) {
 
-
-            for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                if(destinationList.getMetadataList().get(i).name.equals("public")) {
-
-                    hidriveRoot = destinationList.getMetadataList().get(i);
-
-                    break;
-                }
-            }
-            dCollection = destinationStorage.contents(null, Folder.class, hidriveRoot.id);
-            destinationList = new MetadataCounter(0, dCollection.objects);
-
-        }
-
-        if(isHidriveS) {
-
-            for(int i = 0; i < sourceList.getMetadataList().size(); i++) {
-                if(sourceList.getMetadataList().get(i).name.equals("public")) {
-
-                    hidriveRoot = sourceList.getMetadataList().get(i);
-
-                }
-            }
-            sCollection = sourceStorage.contents(null, Folder.class, hidriveRoot.id);
-            sourceList = new MetadataCounter(0, sCollection.objects);
-        }
 
 
         for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
@@ -642,37 +609,35 @@ public class CloudController {
 
         List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
         Collections.reverse(reversed);
-        if(!isHidriveD) {
-            for (Metadata data : reversed) {
-                if (data.type.equals("folder")) {
-                    if (!sourceList.getMetadataList().contains(data)) {
+        for (Metadata data : reversed) {
+            if (data.type.equals("folder")) {
+                }
+            if (!sourceList.getMetadataList().contains(data)) {
 
-                        destinationStorage.delete(null, Folder.class, data.id);
-                        logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
+                destinationStorage.delete(null, Folder.class, data.id);
+                logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
+                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                        forRemove.add(destinationList.getMetadataList().get(i));
+                    }
+                }
+
+            } else {
+                for (Metadata file : sourceList.getMetadataList()) {
+                    if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
+                        destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
+                        logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
                         for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                             if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
                                 forRemove.add(destinationList.getMetadataList().get(i));
                             }
                         }
 
-                    } else {
-                        for (Metadata file : sourceList.getMetadataList()) {
-                            if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                                destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
-                                logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
-                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                        forRemove.add(destinationList.getMetadataList().get(i));
-                                    }
-                                }
-
-                            }
-                        }
                     }
                 }
-
             }
         }
+
 
         destinationList.getMetadataList().removeAll(forRemove);
         forRemove.removeAll(forRemove);
@@ -697,9 +662,7 @@ public class CloudController {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
+
                     }
                     Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                     destinationList.getMetadataList().add(metadata);
@@ -723,9 +686,7 @@ public class CloudController {
                             fileParams.put("name", mData.name);
                             if (fileParams.size() <= 1) {
                                 fileParams.put("parent_id", "root");
-                                if(isHidriveD) {
-                                    fileParams.put("parent_id", hidriveRoot.id);
-                                }
+
                             }
                             Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                             destinationList.getMetadataList().add(metadata);
@@ -755,9 +716,7 @@ public class CloudController {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
+
                     }
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
