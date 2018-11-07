@@ -33,24 +33,7 @@ public class User {
     private String hidriveToken;
     private String pcloudAccount;
     private String pcloudToken;
-    private String cloudmeAccount;
-    private String cloudmeToken;
 
-    public String getCloudmeAccount() {
-        return cloudmeAccount;
-    }
-
-    public void setCloudmeAccount(String cloudmeAccount) {
-        this.cloudmeAccount = cloudmeAccount;
-    }
-
-    public String getCloudmeToken() {
-        return cloudmeToken;
-    }
-
-    public void setCloudmeToken(String cloudmeToken) {
-        this.cloudmeToken = cloudmeToken;
-    }
 
     public String getPcloudAccount() {
         return pcloudAccount;

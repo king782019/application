@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SyncAccount {
     @JsonProperty
-    private Integer source;
+    private String source;
     @JsonProperty
-    private Integer destination;
+    private String destination;
 
-    public Integer getSource() {
+    public String getSource() {
         return source;
     }
 
-    public void setSource(Integer source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
-    public Integer getDestination() {
+    public String getDestination() {
         return destination;
     }
 
-    public void setDestination(Integer destination) {
+    public void setDestination(String destination) {
         this.destination = destination;
     }
 }
