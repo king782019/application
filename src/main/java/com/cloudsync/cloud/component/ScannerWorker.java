@@ -50,6 +50,25 @@ public class ScannerWorker implements Runnable {
 
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
+        if(user.getBoxAccount() != null) {
+            Map<String, String> innerAccount = new HashMap<>();
+            innerAccount.put(user.getBoxAccount(), user.getBoxToken());
+            KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
+            MetadataCollection collection = new MetadataCollection();
+            try {
+                collection = storage.contents(null, Folder.class, "root");
+            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+            MetadataCounter list = null;
+            try {
+                list = listLoop(storage, sourceList);
+            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                e.printStackTrace();
+            }
+            account.put(list, innerAccount);
+        }
 
         if(user.getGoogleAccount() != null) {
 
@@ -132,6 +151,26 @@ public class ScannerWorker implements Runnable {
             account.put(list, innerAccount);
         }
 
+        if(user.getHidriveAccount() != null) {
+            Map<String, String> innerAccount = new HashMap<>();
+            innerAccount.put(user.getHidriveAccount(), user.getHidriveToken());
+            KClient storage = new KClient(user.getHidriveToken(), user.getHidriveAccount(), null);
+            MetadataCollection collection = new MetadataCollection();
+            try {
+                collection = storage.contents(null, Folder.class, "root");
+            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+            MetadataCounter list = null;
+            try {
+                list = listLoop(storage, sourceList);
+            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                e.printStackTrace();
+            }
+            account.put(list, innerAccount);
+        }
+
         if(user.getPcloudAccount() != null) {
             Map<String, String> innerAccount = new HashMap<>();
             innerAccount.put(user.getPcloudAccount(), user.getPcloudToken());
@@ -152,8 +191,64 @@ public class ScannerWorker implements Runnable {
             account.put(list, innerAccount);
         }
 
-        for(Map.Entry map : account.entrySet()) {
+        for(Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
+            for(Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
+                if(map.getKey().equals(innerMap.getKey())) {
+                    continue;
+                } else {
+                    MetadataCounter source = map.getKey();
+                    MetadataCounter destination = innerMap.getKey();
+                    Map<String, String> firstMap = map.getValue();
+                    Map<String, String> secondMap = innerMap.getValue();
+                    String sourceAccount = null;
+                    String sourceToken = null;
+                    for(Map.Entry<String, String> accountMap : firstMap.entrySet()) {
+                        sourceAccount = accountMap.getKey();
+                        sourceToken = accountMap.getValue();
+                    }
+                    String destinationToken = null;
+                    String destinationAccount = null;
+                    for(Map.Entry<String, String> accountMap : secondMap.entrySet()) {
+                        destinationAccount = accountMap.getKey();
+                        destinationToken = accountMap.getValue();
+                    }
+                    try {
+                        requestAdd(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                    } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
 
+        for(Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
+            for(Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
+                if(map.getKey().equals(innerMap.getKey())) {
+                    continue;
+                } else {
+                    MetadataCounter source = map.getKey();
+                    MetadataCounter destination = innerMap.getKey();
+                    Map<String, String> firstMap = map.getValue();
+                    Map<String, String> secondMap = innerMap.getValue();
+                    String sourceAccount = null;
+                    String sourceToken = null;
+                    for(Map.Entry<String, String> accountMap : firstMap.entrySet()) {
+                        sourceAccount = accountMap.getKey();
+                        sourceToken = accountMap.getValue();
+                    }
+                    String destinationToken = null;
+                    String destinationAccount = null;
+                    for(Map.Entry<String, String> accountMap : secondMap.entrySet()) {
+                        destinationAccount = accountMap.getKey();
+                        destinationToken = accountMap.getValue();
+                    }
+                    try {
+                        requestDelete(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                    } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
 
 
@@ -196,10 +291,6 @@ public class ScannerWorker implements Runnable {
     @SuppressWarnings("Duplicates")
     public MetadataCounter requestAdd(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
-        Boolean isHidriveS = false;
-        Boolean isHidriveD = destinationList.getHidrive();
-
-        Metadata hidriveRoot = new Metadata();
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
         KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
@@ -268,9 +359,7 @@ public class ScannerWorker implements Runnable {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
+
                     }
                     Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                     destinationList.getMetadataList().add(metadata);
@@ -294,9 +383,7 @@ public class ScannerWorker implements Runnable {
                             fileParams.put("name", mData.name);
                             if (fileParams.size() <= 1) {
                                 fileParams.put("parent_id", "root");
-                                if(isHidriveD) {
-                                    fileParams.put("parent_id", hidriveRoot.id);
-                                }
+
                             }
                             Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                             destinationList.getMetadataList().add(metadata);
@@ -326,9 +413,7 @@ public class ScannerWorker implements Runnable {
                     fileParams.put("name", mData.name);
                     if (fileParams.size() <= 1) {
                         fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
+
                     }
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
@@ -336,6 +421,136 @@ public class ScannerWorker implements Runnable {
                 }
             }
         }
+
+        return sourceList;
+    }
+
+    @SuppressWarnings("Duplicates")
+    public MetadataCounter requestDelete(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+        logger.debug("In 'sycno' method");
+
+
+
+
+        KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
+        KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
+
+        Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+
+
+
+
+        Integer num = null;
+        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
+
+            sourceList.getMetadataList().get(i).parent.Id = "root";
+            sourceList.getMetadataList().get(i).parent.name = "root";
+
+            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            sourceList.getMetadataList().remove(ind);
+            logger.debug("Shared with me folder deleted from source list");
+        }
+        num = null;
+
+
+        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+
+            destinationList.getMetadataList().get(i).parent.Id = "root";
+
+            destinationList.getMetadataList().get(i).parent.name = "root";
+
+            if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
+
+                num = i;
+            }
+        }
+
+
+        if (num != null) {
+            int ind = num;
+            destinationList.getMetadataList().remove(ind);
+            logger.debug("Shared with me folder deleted from destination list");
+        }
+
+
+        sourceList = listLoop(sourceStorage, sourceList);
+        destinationList = listLoop(destinationStorage, destinationList);
+
+        List<Metadata> forRemove = new ArrayList<>();
+        for (Metadata data : destinationList.getMetadataList()) {
+            if (data.type.equals("file")) {
+                if (!sourceList.getMetadataList().contains(data)) {
+                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                    logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
+                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                            forRemove.add(destinationList.getMetadataList().get(i));
+                        }
+                    }
+
+                } else {
+                    for (Metadata file : sourceList.getMetadataList()) {
+                        if (file.type.equals(data.type)) {
+                            if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
+                                destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                                logger.debug(String.format("File %s has been deleted from destination storage (else)", data.name));
+                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                        forRemove.add(destinationList.getMetadataList().get(i));
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        destinationList.getMetadataList().removeAll(forRemove);
+        forRemove.removeAll(forRemove);
+
+        List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
+        Collections.reverse(reversed);
+
+        for (Metadata data : reversed) {
+            if (data.type.equals("folder")) {
+                if (!sourceList.getMetadataList().contains(data)) {
+
+                    destinationStorage.delete(null, Folder.class, data.id);
+                    logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
+                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                            forRemove.add(destinationList.getMetadataList().get(i));
+                        }
+                    }
+
+                } else {
+                    for (Metadata file : sourceList.getMetadataList()) {
+                        if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
+                            destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
+                            logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
+                            for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                    forRemove.add(destinationList.getMetadataList().get(i));
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+
+        }
+
+        destinationList.getMetadataList().removeAll(forRemove);
+        forRemove.removeAll(forRemove);
 
         return sourceList;
     }
