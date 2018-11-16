@@ -1,6 +1,7 @@
 package com.cloudsync.cloud.model;
 
 import com.cloudsync.cloud.constraint.ValidPassword;
+import org.springframework.context.annotation.Scope;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -8,6 +9,7 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user", schema = "public")
+@Scope("prototype")
 public class User {
     private Long id;
 

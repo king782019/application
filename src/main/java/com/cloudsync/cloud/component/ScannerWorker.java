@@ -1,9 +1,7 @@
 package com.cloudsync.cloud.component;
 
 import com.cloudsync.cloud.model.MetadataCounter;
-import com.cloudsync.cloud.model.SyncAccount;
 import com.cloudsync.cloud.model.User;
-import com.cloudsync.cloud.repository.UserRepository;
 import com.kloudless.KClient;
 import com.kloudless.Kloudless;
 import com.kloudless.exception.APIConnectionException;
@@ -13,244 +11,242 @@ import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.model.Folder;
 import com.kloudless.model.Metadata;
 import com.kloudless.model.MetadataCollection;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-@Component
-public class ScannerWorker implements Runnable {
+public class ScannerWorker extends Thread {
 
-    Authentication auth;
-    UserRepository userRepository;
+    private User user;
+    private volatile boolean running = true;
     private static final Logger logger = LogManager.getLogger(ScannerWorker.class);
 
-    @Autowired
-    private ScannerWorker(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ScannerWorker(User user){
+        this.user = user;
     }
 
-    public ScannerWorker(Authentication auth){
-        this.auth = auth;
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 
     @Override
     public void run() {
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername());
-        Map<MetadataCounter, Map<String, String>> account = new HashMap<>();
+        while(running) {
 
-        List<MetadataCounter> metadataCollection = new ArrayList<>();
+            logger.debug("Worker executing now");
 
-        Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+            Map<MetadataCounter, Map<String, String>> account = new HashMap<>();
 
-        if(user.getBoxAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getBoxAccount(), user.getBoxToken());
-            KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
+            List<MetadataCounter> metadataCollection = new ArrayList<>();
 
-        if(user.getGoogleAccount() != null) {
+            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getGoogleAccount(), user.getGoogleToken());
-            KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (user.getBoxAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getBoxAccount(), user.getBoxToken());
+                KClient storage = new KClient(user.getBoxToken(), user.getBoxAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
             }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
 
-        if(user.getDropboxAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getDropboxAccount(), user.getDropboxToken());
-            KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
+            if (user.getGoogleAccount() != null) {
 
-        if(user.getOnedriveAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getOnedriveAccount(), user.getOnedriveToken());
-            KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getGoogleAccount(), user.getGoogleToken());
+                KClient storage = new KClient(user.getGoogleToken(), user.getGoogleAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
             }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
 
-        if(user.getYandexAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getYandexAccount(), user.getYandexToken());
-            KClient storage = new KClient(user.getYandexToken(), user.getYandexAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (user.getDropboxAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getDropboxAccount(), user.getDropboxToken());
+                KClient storage = new KClient(user.getDropboxToken(), user.getDropboxAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
             }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
 
-        if(user.getHidriveAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getHidriveAccount(), user.getHidriveToken());
-            KClient storage = new KClient(user.getHidriveToken(), user.getHidriveAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (user.getOnedriveAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getOnedriveAccount(), user.getOnedriveToken());
+                KClient storage = new KClient(user.getOnedriveToken(), user.getOnedriveAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
             }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
 
-        if(user.getPcloudAccount() != null) {
-            Map<String, String> innerAccount = new HashMap<>();
-            innerAccount.put(user.getPcloudAccount(), user.getPcloudToken());
-            KClient storage = new KClient(user.getPcloudToken(), user.getPcloudAccount(), null);
-            MetadataCollection collection = new MetadataCollection();
-            try {
-                collection = storage.contents(null, Folder.class, "root");
-            } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (user.getYandexAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getYandexAccount(), user.getYandexToken());
+                KClient storage = new KClient(user.getYandexToken(), user.getYandexAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
             }
-            MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
-            MetadataCounter list = null;
-            try {
-                list = listLoop(storage, sourceList);
-            } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
-                e.printStackTrace();
-            }
-            account.put(list, innerAccount);
-        }
 
-        for(Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
-            for(Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
-                if(map.getKey().equals(innerMap.getKey())) {
-                    continue;
-                } else {
-                    MetadataCounter source = map.getKey();
-                    MetadataCounter destination = innerMap.getKey();
-                    Map<String, String> firstMap = map.getValue();
-                    Map<String, String> secondMap = innerMap.getValue();
-                    String sourceAccount = null;
-                    String sourceToken = null;
-                    for(Map.Entry<String, String> accountMap : firstMap.entrySet()) {
-                        sourceAccount = accountMap.getKey();
-                        sourceToken = accountMap.getValue();
+            if (user.getHidriveAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getHidriveAccount(), user.getHidriveToken());
+                KClient storage = new KClient(user.getHidriveToken(), user.getHidriveAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
+            }
+
+            if (user.getPcloudAccount() != null) {
+                Map<String, String> innerAccount = new HashMap<>();
+                innerAccount.put(user.getPcloudAccount(), user.getPcloudToken());
+                KClient storage = new KClient(user.getPcloudToken(), user.getPcloudAccount(), null);
+                MetadataCollection collection = new MetadataCollection();
+                try {
+                    collection = storage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                MetadataCounter list = null;
+                try {
+                    list = listLoop(storage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | InvalidRequestException | AuthenticationException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                account.put(list, innerAccount);
+            }
+
+            for (Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
+                for (Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
+                    if (map.getKey().equals(innerMap.getKey())) {
+                        continue;
+                    } else {
+                        MetadataCounter source = map.getKey();
+                        MetadataCounter destination = innerMap.getKey();
+                        Map<String, String> firstMap = map.getValue();
+                        Map<String, String> secondMap = innerMap.getValue();
+                        String sourceAccount = null;
+                        String sourceToken = null;
+                        for (Map.Entry<String, String> accountMap : firstMap.entrySet()) {
+                            sourceAccount = accountMap.getKey();
+                            sourceToken = accountMap.getValue();
+                        }
+                        String destinationToken = null;
+                        String destinationAccount = null;
+                        for (Map.Entry<String, String> accountMap : secondMap.entrySet()) {
+                            destinationAccount = accountMap.getKey();
+                            destinationToken = accountMap.getValue();
+                        }
+                        try {
+                            requestAdd(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                        } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    String destinationToken = null;
-                    String destinationAccount = null;
-                    for(Map.Entry<String, String> accountMap : secondMap.entrySet()) {
-                        destinationAccount = accountMap.getKey();
-                        destinationToken = accountMap.getValue();
-                    }
-                    try {
-                        requestAdd(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
-                    } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
+                }
+            }
+
+            for (Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
+                for (Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
+                    if (map.getKey().equals(innerMap.getKey())) {
+                        continue;
+                    } else {
+                        MetadataCounter source = map.getKey();
+                        MetadataCounter destination = innerMap.getKey();
+                        Map<String, String> firstMap = map.getValue();
+                        Map<String, String> secondMap = innerMap.getValue();
+                        String sourceAccount = null;
+                        String sourceToken = null;
+                        for (Map.Entry<String, String> accountMap : firstMap.entrySet()) {
+                            sourceAccount = accountMap.getKey();
+                            sourceToken = accountMap.getValue();
+                        }
+                        String destinationToken = null;
+                        String destinationAccount = null;
+                        for (Map.Entry<String, String> accountMap : secondMap.entrySet()) {
+                            destinationAccount = accountMap.getKey();
+                            destinationToken = accountMap.getValue();
+                        }
+                        try {
+                            requestDelete(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                        } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         }
 
-        for(Map.Entry<MetadataCounter, Map<String, String>> map : account.entrySet()) {
-            for(Map.Entry<MetadataCounter, Map<String, String>> innerMap : account.entrySet()) {
-                if(map.getKey().equals(innerMap.getKey())) {
-                    continue;
-                } else {
-                    MetadataCounter source = map.getKey();
-                    MetadataCounter destination = innerMap.getKey();
-                    Map<String, String> firstMap = map.getValue();
-                    Map<String, String> secondMap = innerMap.getValue();
-                    String sourceAccount = null;
-                    String sourceToken = null;
-                    for(Map.Entry<String, String> accountMap : firstMap.entrySet()) {
-                        sourceAccount = accountMap.getKey();
-                        sourceToken = accountMap.getValue();
-                    }
-                    String destinationToken = null;
-                    String destinationAccount = null;
-                    for(Map.Entry<String, String> accountMap : secondMap.entrySet()) {
-                        destinationAccount = accountMap.getKey();
-                        destinationToken = accountMap.getValue();
-                    }
-                    try {
-                        requestDelete(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
-                    } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
+        logger.debug("Worker exiting now");
 
 
     }
@@ -270,7 +266,6 @@ public class ScannerWorker implements Runnable {
                 for (int j = 0; j < temp.objects.size(); j++) {
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
-
                 }
                 break;
             }
@@ -281,7 +276,11 @@ public class ScannerWorker implements Runnable {
         }
 
         list.setCounter(i + 1);
+
         if (list.getMetadataList().size() != i) {
+            if(i > 100) {
+                return list;
+            }
             return listLoop(client, list);
         }
 

@@ -2,6 +2,7 @@ package com.cloudsync.cloud.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

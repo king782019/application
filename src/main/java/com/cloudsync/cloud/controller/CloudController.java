@@ -1,5 +1,7 @@
 package com.cloudsync.cloud.controller;
 
+import com.cloudsync.cloud.component.ScannerWorker;
+import com.cloudsync.cloud.configuration.WorkerExecutorConfig;
 import com.cloudsync.cloud.model.MetadataCounter;
 import com.cloudsync.cloud.model.Provider;
 import com.cloudsync.cloud.model.SyncAccount;
@@ -16,6 +18,7 @@ import com.kloudless.model.Metadata;
 import com.kloudless.model.MetadataCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +31,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class CloudController {
@@ -38,6 +43,8 @@ public class CloudController {
     private ScheduledExecutorService scheduledExecutorService;
 
     final UserRepository userRepository;
+
+    volatile List<ScannerWorker> threads = new ArrayList<>();
 
     @Autowired
     public CloudController(UserRepository userRepository, ScheduledExecutorService scheduledExecutorService) {
@@ -89,7 +96,22 @@ public class CloudController {
         currentUser.setPcloudToken(provider.getAccessToken());
         userRepository.save(currentUser);
         SyncAccount account = new SyncAccount();
-        account.setSource("box");
+        if(currentUser.getGoogleAccount() != null) {
+            account.setSource("google");
+        } else if (currentUser.getDropboxAccount() != null) {
+            account.setSource("dropbox");
+        } else if (currentUser.getBoxAccount() != null) {
+            account.setSource("box");
+        } else if (currentUser.getOnedriveAccount() != null) {
+            account.setSource("onedrive");
+        } else if (currentUser.getYandexAccount() != null) {
+            account.setSource("yandex");
+        } else if (currentUser.getHidriveAccount() != null) {
+            account.setSource("hidrive");
+        }else {
+            return null;
+        }
+
         account.setDestination("pcloud");
         fullSyncronize(account, auth);
         return "OK";
@@ -103,7 +125,21 @@ public class CloudController {
         currentUser.setHidriveToken(provider.getAccessToken());
         userRepository.save(currentUser);
         SyncAccount account = new SyncAccount();
-        account.setSource("box");
+        if(currentUser.getGoogleAccount() != null) {
+            account.setSource("google");
+        } else if (currentUser.getDropboxAccount() != null) {
+            account.setSource("dropbox");
+        } else if (currentUser.getBoxAccount() != null) {
+            account.setSource("box");
+        } else if (currentUser.getOnedriveAccount() != null) {
+            account.setSource("onedrive");
+        } else if (currentUser.getYandexAccount() != null) {
+            account.setSource("yandex");
+        } else if (currentUser.getHidriveAccount() != null) {
+            account.setSource("pcloud");
+        }else {
+            return null;
+        }
         account.setDestination("hidrive");
         fullSyncronize(account, auth);
         return "OK";
@@ -117,12 +153,27 @@ public class CloudController {
         currentUser.setYandexToken(provider.getAccessToken());
         userRepository.save(currentUser);
         SyncAccount account = new SyncAccount();
-        account.setSource("box");
+        if(currentUser.getGoogleAccount() != null) {
+            account.setSource("google");
+        } else if (currentUser.getDropboxAccount() != null) {
+            account.setSource("dropbox");
+        } else if (currentUser.getBoxAccount() != null) {
+            account.setSource("box");
+        } else if (currentUser.getOnedriveAccount() != null) {
+            account.setSource("onedrive");
+        } else if (currentUser.getYandexAccount() != null) {
+            account.setSource("pcloud");
+        } else if (currentUser.getHidriveAccount() != null) {
+            account.setSource("hidrive");
+        }else {
+            return null;
+        }
         account.setDestination("yandex");
         fullSyncronize(account, auth);
         return "OK";
     }
 
+    @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/addServiceGoogle", method = RequestMethod.POST)
     @ResponseBody
     public String addServiceGoogle(@RequestBody Provider provider, Authentication auth) throws UsernameNotFoundException, APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
@@ -133,7 +184,21 @@ public class CloudController {
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
             SyncAccount account = new SyncAccount();
-            account.setSource("box");
+            if(currentUser.getGoogleAccount() != null) {
+                account.setSource("pdrive");
+            } else if (currentUser.getDropboxAccount() != null) {
+                account.setSource("dropbox");
+            } else if (currentUser.getBoxAccount() != null) {
+                account.setSource("box");
+            } else if (currentUser.getOnedriveAccount() != null) {
+                account.setSource("onedrive");
+            } else if (currentUser.getYandexAccount() != null) {
+                account.setSource("yandex");
+            } else if (currentUser.getHidriveAccount() != null) {
+                account.setSource("hidrive");
+            }else {
+                return null;
+            }
             account.setDestination("google");
             fullSyncronize(account, auth);
         } catch (UsernameNotFoundException err) {
@@ -153,7 +218,21 @@ public class CloudController {
             currentUser.setDropboxToken(provider.getAccessToken());
             userRepository.save(currentUser);
             SyncAccount account = new SyncAccount();
-            account.setSource("box");
+            if(currentUser.getGoogleAccount() != null) {
+                account.setSource("google");
+            } else if (currentUser.getDropboxAccount() != null) {
+                account.setSource("pcloud");
+            } else if (currentUser.getBoxAccount() != null) {
+                account.setSource("box");
+            } else if (currentUser.getOnedriveAccount() != null) {
+                account.setSource("onedrive");
+            } else if (currentUser.getYandexAccount() != null) {
+                account.setSource("yandex");
+            } else if (currentUser.getHidriveAccount() != null) {
+                account.setSource("hidrive");
+            }else {
+                return null;
+            }
             account.setDestination("dropbox");
             fullSyncronize(account, auth);
         } catch (UsernameNotFoundException err) {
@@ -173,7 +252,21 @@ public class CloudController {
             currentUser.setOnedriveToken(provider.getAccessToken());
             userRepository.save(currentUser);
             SyncAccount account = new SyncAccount();
-            account.setSource("box");
+            if(currentUser.getGoogleAccount() != null) {
+                account.setSource("google");
+            } else if (currentUser.getDropboxAccount() != null) {
+                account.setSource("dropbox");
+            } else if (currentUser.getBoxAccount() != null) {
+                account.setSource("box");
+            } else if (currentUser.getOnedriveAccount() != null) {
+                account.setSource("pcloud");
+            } else if (currentUser.getYandexAccount() != null) {
+                account.setSource("yandex");
+            } else if (currentUser.getHidriveAccount() != null) {
+                account.setSource("hidrive");
+            } else {
+                return null;
+            }
             account.setDestination("onedrive");
             fullSyncronize(account, auth);
         } catch (UsernameNotFoundException err) {
@@ -185,16 +278,36 @@ public class CloudController {
 
     @RequestMapping(value = "/addServiceBox", method = RequestMethod.POST)
     @ResponseBody
-    public String addServiceBox(@RequestBody Provider provider, Authentication auth) throws UsernameNotFoundException {
+    public String addServiceBox(@RequestBody Provider provider, Authentication auth) throws UsernameNotFoundException, AuthenticationException, UnsupportedEncodingException {
         try {
             UserDetails user = (UserDetails) auth.getPrincipal();
             User currentUser = userRepository.findByUsername(user.getUsername());
             currentUser.setBoxAccount(provider.getAccount().getId());
             currentUser.setBoxToken(provider.getAccessToken());
             userRepository.save(currentUser);
+            SyncAccount account = new SyncAccount();
+            if(currentUser.getGoogleAccount() != null) {
+                account.setSource("google");
+            } else if (currentUser.getDropboxAccount() != null) {
+                account.setSource("dropbox");
+            } else if (currentUser.getBoxAccount() != null) {
+                account.setSource("pcloud");
+            } else if (currentUser.getOnedriveAccount() != null) {
+                account.setSource("pcloud");
+            } else if (currentUser.getYandexAccount() != null) {
+                account.setSource("yandex");
+            } else if (currentUser.getHidriveAccount() != null) {
+                account.setSource("hidrive");
+            } else {
+                return null;
+            }
+            account.setDestination("box");
+            fullSyncronize(account, auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
+        } catch (APIConnectionException | InvalidRequestException | APIException e) {
+            e.printStackTrace();
         }
         return "OK";
     }
@@ -464,14 +577,23 @@ public class CloudController {
     @SuppressWarnings("Duplicates")
     public List<Metadata> fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
-        Boolean isHidriveS = false;
-        Boolean isHidriveD = false;
-
-        Metadata hidriveRoot = new Metadata();
 
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
+
+        for(int i = 0; i < threads.size(); i++) {
+            ScannerWorker thread = threads.get(i);
+            if(thread.getName().equals(user.getUsername())) {
+                thread.setRunning(false);
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         switch (syncAccount.getSource()) {
             case "google":
                 sourceAccount = user.getGoogleAccount();
@@ -496,7 +618,6 @@ public class CloudController {
             case "hidrive":
                 sourceAccount = user.getHidriveAccount();
                 sourceToken = user.getHidriveToken();
-                isHidriveS = true;
                 break;
             case "pcloud":
                 sourceAccount = user.getPcloudAccount();
@@ -530,7 +651,6 @@ public class CloudController {
             case "hidrive":
                 destinationAccount = user.getHidriveAccount();
                 destinationToken = user.getHidriveToken();
-                isHidriveD = true;
                 break;
             case "pcloud":
                 destinationAccount = user.getPcloudAccount();
@@ -570,34 +690,6 @@ public class CloudController {
             logger.debug("Shared with me folder deleted from source list");
         }
         num = null;
-        if(isHidriveD) {
-
-
-            for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                if(destinationList.getMetadataList().get(i).name.equals("public")) {
-
-                    hidriveRoot = destinationList.getMetadataList().get(i);
-
-                    break;
-                }
-            }
-            dCollection = destinationStorage.contents(null, Folder.class, hidriveRoot.id);
-            destinationList = new MetadataCounter(0, dCollection.objects);
-
-        }
-
-        if(isHidriveS) {
-
-            for(int i = 0; i < sourceList.getMetadataList().size(); i++) {
-                if(sourceList.getMetadataList().get(i).name.equals("public")) {
-
-                    hidriveRoot = sourceList.getMetadataList().get(i);
-
-                }
-            }
-            sCollection = sourceStorage.contents(null, Folder.class, hidriveRoot.id);
-            sourceList = new MetadataCounter(0, sCollection.objects);
-        }
 
 
         for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
@@ -660,7 +752,7 @@ public class CloudController {
 
         List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
         Collections.reverse(reversed);
-        if(!isHidriveD) {
+
             for (Metadata data : reversed) {
                 if (data.type.equals("folder")) {
                     if (!sourceList.getMetadataList().contains(data)) {
@@ -690,313 +782,6 @@ public class CloudController {
                 }
 
             }
-        }
-
-        destinationList.getMetadataList().removeAll(forRemove);
-        forRemove.removeAll(forRemove);
-
-        reversed = new ArrayList<>(sourceList.getMetadataList());
-        Collections.reverse(reversed);
-
-        for (Metadata mData : reversed) {
-            if (mData.type.equals("folder")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
-                    }
-                    Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                    destinationList.getMetadataList().add(metadata);
-                    logger.debug(String.format("Folder %s has been created in destination storage (if)", mData.name));
-
-                } else {
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (!mData.parent.name.equals(destinationList.getMetadataList().get(i).parent.name) && mData.name.equals(destinationList.getMetadataList().get(i).name)) {
-                            HashMap<String, Object> fileParams = new HashMap<>();
-                            for (Metadata data : destinationList.getMetadataList()) {
-                                if (data.type.equals("folder")) {
-                                    if (data.name.equals(mData.parent.name)) {
-                                        fileParams.put("parent_id", data.id);
-                                        break;
-                                    }
-
-                                }
-                            }
-
-
-                            fileParams.put("name", mData.name);
-                            if (fileParams.size() <= 1) {
-                                fileParams.put("parent_id", "root");
-                                if(isHidriveD) {
-                                    fileParams.put("parent_id", hidriveRoot.id);
-                                }
-                            }
-                            Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                            destinationList.getMetadataList().add(metadata);
-                            logger.debug(String.format("Folder %s has been created in destination storage (else)", mData.name));
-                        }
-                    }
-                }
-            }
-        }
-
-
-        for (Metadata mData : sourceList.getMetadataList()) {
-            if (mData.type.equals("file")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                        if(isHidriveD) {
-                            fileParams.put("parent_id", hidriveRoot.id);
-                        }
-                    }
-                    fileParams.put("account", destinationAccount);
-                    com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
-                    logger.debug(String.format("File %s has been copied ", mData.name));
-                }
-            }
-        }
-
-        return sourceList.getMetadataList();
-    }
-
-
-    /**
-     * One-way synchronization
-     *
-     * @param syncAccount
-     * @param auth
-     * @return
-     * @throws UsernameNotFoundException
-     * @throws APIException
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws UnsupportedEncodingException
-     */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(value = "/synco", method = RequestMethod.POST)
-    @ResponseBody
-    public List<Metadata> synco(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
-        logger.debug("In 'sycno' method");
-
-        String sourceAccount, sourceToken, destinationAccount, destinationToken;
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername());
-        switch (syncAccount.getSource()) {
-            case 1:
-                sourceAccount = user.getGoogleAccount();
-                sourceToken = user.getGoogleToken();
-                break;
-            case 2:
-                sourceAccount = user.getDropboxAccount();
-                sourceToken = user.getDropboxToken();
-                break;
-            case 3:
-                sourceAccount = user.getOnedriveAccount();
-                sourceToken = user.getOnedriveToken();
-                break;
-            case 4:
-                sourceAccount = user.getBoxAccount();
-                sourceToken = user.getBoxToken();
-                break;
-            case 5:
-                sourceAccount = user.getYandexAccount();
-                sourceToken = user.getYandexToken();
-                break;
-            case 6:
-                sourceAccount = user.getHidriveAccount();
-                sourceToken = user.getHidriveToken();
-                break;
-            case 7:
-                sourceAccount = user.getPcloudAccount();
-                sourceToken= user.getPcloudToken();
-                break;
-            default:
-                return null;
-        }
-
-        switch (syncAccount.getDestination()) {
-            case 1:
-                destinationAccount = user.getGoogleAccount();
-                destinationToken = user.getGoogleToken();
-                break;
-            case 2:
-                destinationAccount = user.getDropboxAccount();
-                destinationToken = user.getDropboxToken();
-                break;
-            case 3:
-                destinationAccount = user.getOnedriveAccount();
-                destinationToken = user.getOnedriveToken();
-                break;
-            case 4:
-                destinationAccount = user.getBoxAccount();
-                destinationToken = user.getBoxToken();
-                break;
-            case 5:
-                destinationAccount = user.getYandexAccount();
-                destinationToken = user.getYandexToken();
-                break;
-            case 6:
-                destinationAccount = user.getHidriveAccount();
-                destinationToken = user.getHidriveToken();
-                break;
-            case 7:
-                destinationAccount = user.getPcloudAccount();
-                destinationToken= user.getPcloudToken();
-                break;
-            default:
-                return null;
-        }
-
-        KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
-        KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
-        MetadataCollection sCollection = sourceStorage.contents(null, Folder.class, "root");
-        MetadataCollection dCollection = destinationStorage.contents(null, Folder.class, "root");
-        Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-
-
-
-
-        MetadataCounter sourceList = new MetadataCounter(0, sCollection.objects);
-        MetadataCounter destinationList = new MetadataCounter(0, dCollection.objects);
-
-
-
-        Integer num = null;
-        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
-            sourceList.getMetadataList().get(i).parent.Id = "root";
-            sourceList.getMetadataList().get(i).parent.name = "root";
-
-            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-                num = i;
-            }
-        }
-        if (num != null) {
-            int ind = num;
-            sourceList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from source list");
-        }
-        num = null;
-
-
-
-        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-
-            destinationList.getMetadataList().get(i).parent.Id = "root";
-
-            destinationList.getMetadataList().get(i).parent.name = "root";
-
-            if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-
-                num = i;
-            }
-        }
-
-
-        if (num != null) {
-            int ind = num;
-            destinationList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from destination list");
-        }
-
-
-        sourceList = listLoop(sourceStorage, sourceList);
-        destinationList = listLoop(destinationStorage, destinationList);
-
-        List<Metadata> forRemove = new ArrayList<>();
-        for (Metadata data : destinationList.getMetadataList()) {
-            if (data.type.equals("file")) {
-                if (!sourceList.getMetadataList().contains(data)) {
-                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                    logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                            forRemove.add(destinationList.getMetadataList().get(i));
-                        }
-                    }
-
-                } else {
-                    for (Metadata file : sourceList.getMetadataList()) {
-                        if (file.type.equals(data.type)) {
-                            if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                                destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                                logger.debug(String.format("File %s has been deleted from destination storage (else)", data.name));
-                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                        forRemove.add(destinationList.getMetadataList().get(i));
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-
-        destinationList.getMetadataList().removeAll(forRemove);
-        forRemove.removeAll(forRemove);
-
-        List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
-        Collections.reverse(reversed);
-        for (Metadata data : reversed) {
-            if (data.type.equals("folder")) {
-                }
-            if (!sourceList.getMetadataList().contains(data)) {
-
-                destinationStorage.delete(null, Folder.class, data.id);
-                logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
-                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                        forRemove.add(destinationList.getMetadataList().get(i));
-                    }
-                }
-
-            } else {
-                for (Metadata file : sourceList.getMetadataList()) {
-                    if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                        destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
-                        logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
-                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                forRemove.add(destinationList.getMetadataList().get(i));
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
 
 
         destinationList.getMetadataList().removeAll(forRemove);
@@ -1085,309 +870,17 @@ public class CloudController {
             }
         }
 
-        return sourceList.getMetadataList();
-    }
+        ScannerWorker worker = new ScannerWorker(user);
 
-
-    /**
-     * Two-way synchronization
-     *
-     * @param syncAccount
-     * @param auth
-     * @return
-     * @throws UsernameNotFoundException
-     * @throws APIException
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws UnsupportedEncodingException
-     */
-    @SuppressWarnings("Duplicates")
-    @RequestMapping(value = "/twowaysynco", method = RequestMethod.POST)
-    @ResponseBody
-    public List<Metadata> twowaysynco(@RequestBody SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
-        String sourceAccount, sourceToken, destinationAccount, destinationToken;
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername());
-        switch (syncAccount.getSource()) {
-            case 1:
-                sourceAccount = user.getGoogleAccount();
-                sourceToken = user.getGoogleToken();
-                break;
-            case 2:
-                sourceAccount = user.getDropboxAccount();
-                sourceToken = user.getDropboxToken();
-                break;
-            case 3:
-                sourceAccount = user.getOnedriveAccount();
-                sourceToken = user.getOnedriveToken();
-                break;
-            case 4:
-                sourceAccount = user.getBoxAccount();
-                sourceToken = user.getBoxToken();
-                break;
-            case 5:
-                sourceAccount = user.getYandexAccount();
-                sourceToken = user.getYandexToken();
-                break;
-            default:
-                return null;
-        }
-
-        switch (syncAccount.getDestination()) {
-            case 1:
-                destinationAccount = user.getGoogleAccount();
-                destinationToken = user.getGoogleToken();
-                break;
-            case 2:
-                destinationAccount = user.getDropboxAccount();
-                destinationToken = user.getDropboxToken();
-                break;
-            case 3:
-                destinationAccount = user.getOnedriveAccount();
-                destinationToken = user.getOnedriveToken();
-                break;
-            case 4:
-                destinationAccount = user.getBoxAccount();
-                destinationToken = user.getBoxToken();
-                break;
-            case 5:
-                destinationAccount = user.getYandexAccount();
-                destinationToken = user.getYandexToken();
-                break;
-            default:
-                return null;
-        }
-
-        KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
-        KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
-        MetadataCollection sCollection = sourceStorage.contents(null, Folder.class, "root");
-        MetadataCollection dCollection = destinationStorage.contents(null, Folder.class, "root");
-        Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-
-
-        MetadataCounter sourceList = new MetadataCounter(0, sCollection.objects);
-        MetadataCounter destinationList = new MetadataCounter(0, dCollection.objects);
-
-
-        Integer num = null;
-        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
-            sourceList.getMetadataList().get(i).parent.Id = "root";
-            sourceList.getMetadataList().get(i).parent.name = "root";
-
-            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-                num = i;
-            }
-        }
-        if (num != null) {
-            int ind = num;
-            sourceList.getMetadataList().remove(ind);
-        }
-        num = null;
-
-        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-
-            destinationList.getMetadataList().get(i).parent.Id = "root";
-            destinationList.getMetadataList().get(i).parent.name = "root";
-
-            if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-
-                num = i;
-            }
-        }
-
-
-        if (num != null) {
-            int ind = num;
-            destinationList.getMetadataList().remove(ind);
-        }
-
-
-        sourceList = listLoop(sourceStorage, sourceList);
-        destinationList = listLoop(destinationStorage, destinationList);
-
-
-        for (Metadata mData : sourceList.getMetadataList()) {
-            if (mData.type.equals("folder")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                    }
-                    Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                    logger.debug(String.format("Folder %s created in destination storage from first try", metadata.name));
-                    if (fileParams.get("parent_id").equals("root")) {
-                        metadata.parent.name = "root";
-                    } else {
-                        metadata.parent.name = mData.parent.name;
-                    }
-                    destinationList.getMetadataList().add(metadata);
-
-                } else {
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (!mData.parent.name.equals(destinationList.getMetadataList().get(i).parent.name) && mData.name.equals(destinationList.getMetadataList().get(i).name)) {
-                            HashMap<String, Object> fileParams = new HashMap<>();
-                            for (Metadata data : destinationList.getMetadataList()) {
-                                if (data.type.equals("folder")) {
-                                    if (data.name.equals(mData.parent.name)) {
-                                        fileParams.put("parent_id", data.id);
-                                        break;
-                                    }
-
-                                }
-                            }
-
-
-                            fileParams.put("name", mData.name);
-                            if (fileParams.size() <= 1) {
-                                fileParams.put("parent_id", "root");
-                            }
-                            Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                            logger.debug(String.format("Folder %s created in destination storage from second try", metadata.name));
-                            if (fileParams.get("parent_id").equals("root")) {
-                                metadata.parent.name = "root";
-                            } else {
-                                metadata.parent.name = mData.parent.name;
-                            }
-                            destinationList.getMetadataList().add(metadata);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-
-        for (Metadata mData : destinationList.getMetadataList()) {
-            if (mData.type.equals("folder")) {
-                if (!sourceList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : sourceList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                    }
-                    Metadata metadata = sourceStorage.create(null, Folder.class, fileParams);
-                    logger.debug(String.format("Folder %s created in source storage from first try", metadata.name));
-                    if (fileParams.get("parent_id").equals("root")) {
-                        metadata.parent.name = "root";
-                    } else {
-                        metadata.parent.name = fileParams.get("name").toString();
-                    }
-                    sourceList.getMetadataList().add(metadata);
-
-                } else {
-                    for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
-                        if (!mData.parent.name.equals(sourceList.getMetadataList().get(i).parent.name) && mData.name.equals(sourceList.getMetadataList().get(i).name)) {
-                            HashMap<String, Object> fileParams = new HashMap<>();
-                            for (Metadata data : sourceList.getMetadataList()) {
-                                if (data.type.equals("folder")) {
-                                    if (data.name.equals(mData.parent.name)) {
-                                        fileParams.put("parent_id", data.id);
-                                        break;
-                                    }
-
-                                }
-                            }
-
-
-                            fileParams.put("name", mData.name);
-                            if (fileParams.size() <= 1) {
-                                fileParams.put("parent_id", "root");
-                            }
-                            Metadata metadata = sourceStorage.create(null, Folder.class, fileParams);
-                            logger.debug(String.format("Folder %s created in source storage from second try", metadata.name));
-                            if (fileParams.get("parent_id").equals("root")) {
-                                metadata.parent.name = "root";
-                            } else {
-                                metadata.parent.name = fileParams.get("name").toString();
-                            }
-                            sourceList.getMetadataList().add(metadata);
-                            break;
-                        }
-
-                    }
-                }
-            }
-        }
-
-
-        for (Metadata mData : sourceList.getMetadataList()) {
-            if (mData.type.equals("file")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                    }
-                    fileParams.put("account", destinationAccount);
-                    com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
-                    logger.debug(String.format("File %s created in destination storage", mData.name));
-                }
-            }
-        }
-
-        for (Metadata mData : destinationList.getMetadataList()) {
-            if (mData.type.equals("file")) {
-                if (!sourceList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : sourceList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
-                            }
-
-                        }
-                    }
-
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-                    }
-                    fileParams.put("account", sourceAccount);
-                    com.kloudless.model.File.copy(mData.id, destinationAccount, fileParams);
-                    logger.debug(String.format("File %s created in source storage", mData.name));
-                }
-            }
-        }
+        worker.setName(user.getUsername());
+        worker.start();
+        threads.add(worker);
 
         return sourceList.getMetadataList();
     }
+
+
+
 
 
     /**
@@ -1402,6 +895,7 @@ public class CloudController {
      * @throws InvalidRequestException
      * @throws APIConnectionException
      */
+    @SuppressWarnings("Duplicates")
     private MetadataCounter listLoop(KClient client, MetadataCounter list) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
         MetadataCollection temp = new MetadataCollection();
 
