@@ -16,6 +16,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ScannerWorker extends Thread {
@@ -238,7 +241,7 @@ public class ScannerWorker extends Thread {
                         }
                         try {
                             requestDelete(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
-                        } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                        } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException | ParseException e) {
                             e.printStackTrace();
                         }
                     }
@@ -258,14 +261,12 @@ public class ScannerWorker extends Thread {
         int i = list.getCounter();
         for (; i < list.getMetadataList().size(); i++) {
             if (list.getMetadataList().get(i).type.equals("folder")) {
-                if (list.getMetadataList().get(i).name.equals(".hidrive")){
-                    continue;
-                }
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
+
                 }
                 break;
             }
@@ -425,7 +426,7 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    public MetadataCounter requestDelete(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+    public MetadataCounter requestDelete(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException, ParseException {
         logger.debug("In 'sycno' method");
 
 
@@ -484,11 +485,19 @@ public class ScannerWorker extends Thread {
         for (Metadata data : destinationList.getMetadataList()) {
             if (data.type.equals("file")) {
                 if (!sourceList.getMetadataList().contains(data)) {
-                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                    logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                            forRemove.add(destinationList.getMetadataList().get(i));
+                    Boolean contains = false;
+                    for(Metadata file : sourceList.getMetadataList()) {
+                        if(file.name.equals(data.name) && file.type.equals(data.type)) {
+                            contains = true;
+                        }
+                    }
+                    if(!contains) {
+                        destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                        logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
+                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                forRemove.add(destinationList.getMetadataList().get(i));
+                            }
                         }
                     }
 
@@ -501,6 +510,44 @@ public class ScannerWorker extends Thread {
                                 for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                                     if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
                                         forRemove.add(destinationList.getMetadataList().get(i));
+                                    }
+                                }
+
+
+                            }
+
+                            if(file.parent.name.equals(data.parent.name) && file.name.equals(data.name) && file.size != data.size) {
+                                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+                                DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+                                Date date1 = df1.parse(file.modified);
+                                Date date2 = df2.parse(data.modified);
+                                if(date2.after(date1)) {
+                                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                                    HashMap<String, Object> fileParams = new HashMap<>();
+                                    for (Metadata Fdata : destinationList.getMetadataList()) {
+                                        if (Fdata.type.equals("folder")) {
+                                            if (Fdata.name.equals(file.parent.name)) {
+                                                fileParams.put("parent_id", Fdata.id);
+                                                break;
+                                            }
+
+                                        }
+                                    }
+
+
+                                    fileParams.put("name", file.name);
+                                    if (fileParams.size() <= 1) {
+                                        fileParams.put("parent_id", "root");
+
+                                    }
+                                    fileParams.put("account", destinationAccount);
+                                    com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
+                                    logger.debug(String.format("File %s has been recopied ", file.name));
+                                }
+
+                                for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                    if(destinationList.getMetadataList().get(i).name.equals(data.name) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
+                                        destinationList.getMetadataList().get(i).modified = file.modified;
                                     }
                                 }
 

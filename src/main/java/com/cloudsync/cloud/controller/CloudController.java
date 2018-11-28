@@ -1,7 +1,6 @@
 package com.cloudsync.cloud.controller;
 
 import com.cloudsync.cloud.component.ScannerWorker;
-import com.cloudsync.cloud.configuration.WorkerExecutorConfig;
 import com.cloudsync.cloud.model.MetadataCounter;
 import com.cloudsync.cloud.model.Provider;
 import com.cloudsync.cloud.model.SyncAccount;
@@ -18,7 +17,6 @@ import com.kloudless.model.Metadata;
 import com.kloudless.model.MetadataCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,26 +28,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 @Controller
 public class CloudController {
 
     private static final Logger logger = LogManager.getLogger(CloudController.class);
 
-    private ScheduledExecutorService scheduledExecutorService;
+    private final UserRepository userRepository;
 
-    final UserRepository userRepository;
-
-    volatile List<ScannerWorker> threads = new ArrayList<>();
+    private volatile List<ScannerWorker> threads = new ArrayList<>();
 
     @Autowired
-    public CloudController(UserRepository userRepository, ScheduledExecutorService scheduledExecutorService) {
+    public CloudController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.scheduledExecutorService = scheduledExecutorService;
     }
 
 
@@ -61,7 +56,6 @@ public class CloudController {
     public String addWebDav(@RequestBody Provider provider, Authentication auth) throws APIException, APIConnectionException, AuthenticationException, InvalidRequestException, UnsupportedEncodingException {
         String tempAccountName = provider.getAccount().getAccount();
         String accountName = tempAccountName.substring(tempAccountName.indexOf("@")+1);
-        accountName.trim();
         if(!accountName.contains("@")) {
             switch(accountName) {
                 case "webdav.yandex.ru":
@@ -135,7 +129,7 @@ public class CloudController {
             account.setSource("onedrive");
         } else if (currentUser.getYandexAccount() != null) {
             account.setSource("yandex");
-        } else if (currentUser.getHidriveAccount() != null) {
+        } else if (currentUser.getPcloudAccount() != null) {
             account.setSource("pcloud");
         }else {
             return null;
@@ -161,7 +155,7 @@ public class CloudController {
             account.setSource("box");
         } else if (currentUser.getOnedriveAccount() != null) {
             account.setSource("onedrive");
-        } else if (currentUser.getYandexAccount() != null) {
+        } else if (currentUser.getPcloudAccount() != null) {
             account.setSource("pcloud");
         } else if (currentUser.getHidriveAccount() != null) {
             account.setSource("hidrive");
@@ -184,8 +178,8 @@ public class CloudController {
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
             SyncAccount account = new SyncAccount();
-            if(currentUser.getGoogleAccount() != null) {
-                account.setSource("pdrive");
+            if(currentUser.getPcloudAccount() != null) {
+                account.setSource("pcloud");
             } else if (currentUser.getDropboxAccount() != null) {
                 account.setSource("dropbox");
             } else if (currentUser.getBoxAccount() != null) {
@@ -220,7 +214,7 @@ public class CloudController {
             SyncAccount account = new SyncAccount();
             if(currentUser.getGoogleAccount() != null) {
                 account.setSource("google");
-            } else if (currentUser.getDropboxAccount() != null) {
+            } else if (currentUser.getPcloudAccount() != null) {
                 account.setSource("pcloud");
             } else if (currentUser.getBoxAccount() != null) {
                 account.setSource("box");
@@ -258,7 +252,7 @@ public class CloudController {
                 account.setSource("dropbox");
             } else if (currentUser.getBoxAccount() != null) {
                 account.setSource("box");
-            } else if (currentUser.getOnedriveAccount() != null) {
+            } else if (currentUser.getPcloudAccount() != null) {
                 account.setSource("pcloud");
             } else if (currentUser.getYandexAccount() != null) {
                 account.setSource("yandex");
@@ -290,10 +284,10 @@ public class CloudController {
                 account.setSource("google");
             } else if (currentUser.getDropboxAccount() != null) {
                 account.setSource("dropbox");
-            } else if (currentUser.getBoxAccount() != null) {
+            } else if (currentUser.getPcloudAccount() != null) {
                 account.setSource("pcloud");
             } else if (currentUser.getOnedriveAccount() != null) {
-                account.setSource("pcloud");
+                account.setSource("onedrive");
             } else if (currentUser.getYandexAccount() != null) {
                 account.setSource("yandex");
             } else if (currentUser.getHidriveAccount() != null) {
@@ -575,7 +569,7 @@ public class CloudController {
      * @throws UnsupportedEncodingException
      */
     @SuppressWarnings("Duplicates")
-    public List<Metadata> fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+    private List<Metadata> fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
 
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
@@ -719,11 +713,19 @@ public class CloudController {
         for (Metadata data : destinationList.getMetadataList()) {
             if (data.type.equals("file")) {
                 if (!sourceList.getMetadataList().contains(data)) {
-                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                    logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                            forRemove.add(destinationList.getMetadataList().get(i));
+                    Boolean contains = false;
+                    for(Metadata file : sourceList.getMetadataList()) {
+                        if(file.name.equals(data.name) && file.type.equals(data.type)) {
+                            contains = true;
+                        }
+                    }
+                    if(!contains) {
+                        destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                        logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
+                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                forRemove.add(destinationList.getMetadataList().get(i));
+                            }
                         }
                     }
 
