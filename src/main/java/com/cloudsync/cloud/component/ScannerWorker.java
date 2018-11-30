@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 public class ScannerWorker extends Thread {
@@ -58,6 +59,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -79,6 +81,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -99,6 +102,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -119,6 +123,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -139,6 +144,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -159,6 +165,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -179,6 +186,7 @@ public class ScannerWorker extends Thread {
                     e.printStackTrace();
                 }
                 MetadataCounter sourceList = new MetadataCounter(0, collection.objects);
+                sourceList = addRootTags(sourceList);
                 MetadataCounter list = null;
                 try {
                     list = listLoop(storage, sourceList);
@@ -254,6 +262,28 @@ public class ScannerWorker extends Thread {
 
     }
 
+    private MetadataCounter addRootTags(MetadataCounter sourceList) {
+        Integer num = null;
+        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
+
+            sourceList.getMetadataList().get(i).parent.Id = "root";
+            sourceList.getMetadataList().get(i).parent.name = "root";
+
+            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
+                num = i;
+            }
+        }
+        if (num != null) {
+            int ind = num;
+            sourceList.getMetadataList().remove(ind);
+            logger.debug("Shared with me folder deleted from source list");
+        }
+        num = null;
+
+        return sourceList;
+
+    }
+
     @SuppressWarnings("Duplicates")
     private MetadataCounter listLoop(KClient client, MetadataCounter list) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
         MetadataCollection temp = new MetadataCollection();
@@ -290,52 +320,11 @@ public class ScannerWorker extends Thread {
 
     @SuppressWarnings("Duplicates")
     public MetadataCounter requestAdd(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
-        logger.debug("In 'sycno' method");
+        logger.debug("In 'requestAdd' method with params: source: {}, destination: {}", sourceAccount, destinationAccount);
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
         KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-
-        Integer num = null;
-        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
-            sourceList.getMetadataList().get(i).parent.Id = "root";
-            sourceList.getMetadataList().get(i).parent.name = "root";
-
-            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-                num = i;
-            }
-        }
-        if (num != null) {
-            int ind = num;
-            sourceList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from source list");
-        }
-        num = null;
-
-
-        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-
-            destinationList.getMetadataList().get(i).parent.Id = "root";
-
-            destinationList.getMetadataList().get(i).parent.name = "root";
-
-            if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-
-                num = i;
-            }
-        }
-
-
-        if (num != null) {
-            int ind = num;
-            destinationList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from destination list");
-        }
-
-
-        sourceList = listLoop(sourceStorage, sourceList);
-        destinationList = listLoop(destinationStorage, destinationList);
 
 
 
@@ -363,7 +352,7 @@ public class ScannerWorker extends Thread {
                     }
                     Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                     destinationList.getMetadataList().add(metadata);
-                    logger.debug(String.format("Folder %s has been created in destination storage (if)", mData.name));
+                    logger.debug("Folder {} has been created in destination storage (if) with params: {}", mData.name, fileParams);
 
                 } else {
                     for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
@@ -387,7 +376,7 @@ public class ScannerWorker extends Thread {
                             }
                             Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
                             destinationList.getMetadataList().add(metadata);
-                            logger.debug(String.format("Folder %s has been created in destination storage (else)", mData.name));
+                            logger.debug("Folder {} has been created in destination storage (else) with params: {}", mData.name, fileParams);
                         }
                     }
                 }
@@ -417,7 +406,12 @@ public class ScannerWorker extends Thread {
                     }
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
-                    logger.debug(String.format("File %s has been copied ", mData.name));
+                    logger.debug("File {} has been copied with params: {}", mData.name, fileParams);
+                    mData.parent.Id = (String)fileParams.get("parent_id");
+                    MetadataCollection collection = destinationStorage.contents(null, Folder.class, "root");
+                    destinationList = new MetadataCounter(0, collection.objects);
+                    addRootTags(destinationList);
+                    destinationList = listLoop(destinationStorage, destinationList);
                 }
             }
         }
@@ -427,59 +421,12 @@ public class ScannerWorker extends Thread {
 
     @SuppressWarnings("Duplicates")
     public MetadataCounter requestDelete(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException, ParseException {
-        logger.debug("In 'sycno' method");
-
-
-
+        logger.debug("In 'requestDelete' method with params: source: {}, destination: {}", sourceAccount, destinationAccount);
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
         KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
 
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-
-
-
-
-        Integer num = null;
-        for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
-            sourceList.getMetadataList().get(i).parent.Id = "root";
-            sourceList.getMetadataList().get(i).parent.name = "root";
-
-            if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-                num = i;
-            }
-        }
-        if (num != null) {
-            int ind = num;
-            sourceList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from source list");
-        }
-        num = null;
-
-
-        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-
-            destinationList.getMetadataList().get(i).parent.Id = "root";
-
-            destinationList.getMetadataList().get(i).parent.name = "root";
-
-            if (destinationList.getMetadataList().get(i).name.equals("Shared with me") || destinationList.getMetadataList().get(i).raw_id.equals("shared_items")) {
-
-                num = i;
-            }
-        }
-
-
-        if (num != null) {
-            int ind = num;
-            destinationList.getMetadataList().remove(ind);
-            logger.debug("Shared with me folder deleted from destination list");
-        }
-
-
-        sourceList = listLoop(sourceStorage, sourceList);
-        destinationList = listLoop(destinationStorage, destinationList);
 
         List<Metadata> forRemove = new ArrayList<>();
         for (Metadata data : destinationList.getMetadataList()) {
@@ -493,7 +440,7 @@ public class ScannerWorker extends Thread {
                     }
                     if(!contains) {
                         destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                        logger.debug(String.format("File %s has been deleted from destination storage (if)", data.name));
+                        logger.debug("File {} has been deleted from destination storage (if)", data.name);
                         for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                             if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
                                 forRemove.add(destinationList.getMetadataList().get(i));
@@ -506,7 +453,7 @@ public class ScannerWorker extends Thread {
                         if (file.type.equals(data.type)) {
                             if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
                                 destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                                logger.debug(String.format("File %s has been deleted from destination storage (else)", data.name));
+                                logger.debug("File {} has been deleted from destination storage (else)", data.name);
                                 for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                                     if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
                                         forRemove.add(destinationList.getMetadataList().get(i));
@@ -516,12 +463,12 @@ public class ScannerWorker extends Thread {
 
                             }
 
-                            if(file.parent.name.equals(data.parent.name) && file.name.equals(data.name) && file.size != data.size) {
-                                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-                                DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-                                Date date1 = df1.parse(file.modified);
-                                Date date2 = df2.parse(data.modified);
-                                if(date2.after(date1)) {
+                            if(file.parent.name.equals(data.parent.name) && file.name.equals(data.name) && !file.size.equals(data.size)) {
+
+                                Instant instant1 = Instant.parse(file.modified);
+                                Instant instant2 = Instant.parse(data.modified);
+
+                                if(instant1.isAfter(instant2)) {
                                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                                     HashMap<String, Object> fileParams = new HashMap<>();
                                     for (Metadata Fdata : destinationList.getMetadataList()) {
