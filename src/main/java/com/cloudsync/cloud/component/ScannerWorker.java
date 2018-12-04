@@ -218,7 +218,7 @@ public class ScannerWorker extends Thread {
                             destinationToken = accountMap.getValue();
                         }
                         try {
-                            requestAdd(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                            requestAdd(sourceAccount, sourceToken, destinationAccount, destinationToken);
                         } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -248,7 +248,7 @@ public class ScannerWorker extends Thread {
                             destinationToken = accountMap.getValue();
                         }
                         try {
-                            requestDelete(source, destination, sourceAccount, sourceToken, destinationAccount, destinationToken);
+                            requestDelete(sourceAccount, sourceToken, destinationAccount, destinationToken);
                         } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException | ParseException e) {
                             e.printStackTrace();
                         }
@@ -319,13 +319,21 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    public MetadataCounter requestAdd(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+    public MetadataCounter requestAdd(String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'requestAdd' method with params: source: {}, destination: {}", sourceAccount, destinationAccount);
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
         KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
 
+        MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+        MetadataCollection destination = destinationStorage.contents(null, Folder.class, "root");
+        MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+        MetadataCounter destinationList = new MetadataCounter(0, destination.objects);
+        sourceList = addRootTags(sourceList);
+        destinationList = addRootTags(destinationList);
+        sourceList = listLoop(sourceStorage, sourceList);
+        destinationList = listLoop(destinationStorage, destinationList);
 
 
         List<Metadata> reversed = new ArrayList<>(sourceList.getMetadataList());
@@ -407,11 +415,7 @@ public class ScannerWorker extends Thread {
                     fileParams.put("account", destinationAccount);
                     com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
                     logger.debug("File {} has been copied with params: {}", mData.name, fileParams);
-                    mData.parent.Id = (String)fileParams.get("parent_id");
-                    MetadataCollection collection = destinationStorage.contents(null, Folder.class, "root");
-                    destinationList = new MetadataCounter(0, collection.objects);
-                    addRootTags(destinationList);
-                    destinationList = listLoop(destinationStorage, destinationList);
+
                 }
             }
         }
@@ -420,13 +424,22 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    public MetadataCounter requestDelete(MetadataCounter sourceList, MetadataCounter destinationList, String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException, ParseException {
+    public MetadataCounter requestDelete(String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException, ParseException {
         logger.debug("In 'requestDelete' method with params: source: {}, destination: {}", sourceAccount, destinationAccount);
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
         KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
 
         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+
+        MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+        MetadataCollection destination = destinationStorage.contents(null, Folder.class, "root");
+        MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+        MetadataCounter destinationList = new MetadataCounter(0, destination.objects);
+        sourceList = addRootTags(sourceList);
+        destinationList = addRootTags(destinationList);
+        sourceList = listLoop(sourceStorage, sourceList);
+        destinationList = listLoop(destinationStorage, destinationList);
 
         List<Metadata> forRemove = new ArrayList<>();
         for (Metadata data : destinationList.getMetadataList()) {
