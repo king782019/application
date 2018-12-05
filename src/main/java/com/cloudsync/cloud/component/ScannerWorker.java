@@ -36,6 +36,7 @@ public class ScannerWorker extends Thread {
         this.running = running;
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void run() {
         while(running) {
@@ -261,7 +262,7 @@ public class ScannerWorker extends Thread {
 
 
     }
-
+    @SuppressWarnings("Duplicates")
     private MetadataCounter addRootTags(MetadataCounter sourceList) {
         Integer num = null;
         for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
