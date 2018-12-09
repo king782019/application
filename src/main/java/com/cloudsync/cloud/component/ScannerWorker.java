@@ -16,9 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 
@@ -310,9 +308,7 @@ public class ScannerWorker extends Thread {
         list.setCounter(i + 1);
 
         if (list.getMetadataList().size() != i) {
-            if(i > 100) {
-                return list;
-            }
+
             return listLoop(client, list);
         }
 
@@ -343,49 +339,68 @@ public class ScannerWorker extends Thread {
         for (Metadata mData : reversed) {
             if (mData.type.equals("folder")) {
                 if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
+                    Instant now = Instant.now();
+                    Instant modified;
+                    if(mData.modified == null) {
+                        modified = Instant.parse(mData.created);
+                    }else {
+                        modified = Instant.parse(mData.modified);
+                    }
+                    modified = modified.plusSeconds(300);
+                    if(modified.isAfter(now)) {
+                        HashMap<String, Object> fileParams = new HashMap<>();
+                        for (Metadata data : destinationList.getMetadataList()) {
+                            if (data.type.equals("folder")) {
+                                if (data.name.equals(mData.parent.name)) {
+                                    fileParams.put("parent_id", data.id);
+                                    break;
+                                }
+
                             }
+                        }
+
+                        fileParams.put("name", mData.name);
+                        if (fileParams.size() <= 1) {
+                            fileParams.put("parent_id", "root");
 
                         }
+                        Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
+                        destinationList.getMetadataList().add(metadata);
+                        logger.debug("Folder {} has been created in destination storage (if) with params: {}", mData.name, fileParams);
                     }
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-
-                    }
-                    Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                    destinationList.getMetadataList().add(metadata);
-                    logger.debug("Folder {} has been created in destination storage (if) with params: {}", mData.name, fileParams);
-
                 } else {
                     for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                         if (!mData.parent.name.equals(destinationList.getMetadataList().get(i).parent.name) && mData.name.equals(destinationList.getMetadataList().get(i).name)) {
-                            HashMap<String, Object> fileParams = new HashMap<>();
-                            for (Metadata data : destinationList.getMetadataList()) {
-                                if (data.type.equals("folder")) {
-                                    if (data.name.equals(mData.parent.name)) {
-                                        fileParams.put("parent_id", data.id);
-                                        break;
+                            Instant now = Instant.now();
+                            Instant modified;
+                            if(mData.modified == null) {
+                                modified = Instant.parse(mData.created);
+                            }else {
+                                modified = Instant.parse(mData.modified);
+                            }
+                            modified = modified.plusSeconds(300);
+                            if(modified.isAfter(now)) {
+                                HashMap<String, Object> fileParams = new HashMap<>();
+                                for (Metadata data : destinationList.getMetadataList()) {
+                                    if (data.type.equals("folder")) {
+                                        if (data.name.equals(mData.parent.name)) {
+                                            fileParams.put("parent_id", data.id);
+                                            break;
+                                        }
+
                                     }
+                                }
+
+
+                                fileParams.put("name", mData.name);
+                                if (fileParams.size() <= 1) {
+                                    fileParams.put("parent_id", "root");
 
                                 }
+                                Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
+                                destinationList.getMetadataList().add(metadata);
+                                logger.debug("Folder {} has been created in destination storage (else) with params: {}", mData.name, fileParams);
                             }
-
-
-                            fileParams.put("name", mData.name);
-                            if (fileParams.size() <= 1) {
-                                fileParams.put("parent_id", "root");
-
-                            }
-                            Metadata metadata = destinationStorage.create(null, Folder.class, fileParams);
-                            destinationList.getMetadataList().add(metadata);
-                            logger.debug("Folder {} has been created in destination storage (else) with params: {}", mData.name, fileParams);
                         }
                     }
                 }
@@ -396,27 +411,31 @@ public class ScannerWorker extends Thread {
         for (Metadata mData : sourceList.getMetadataList()) {
             if (mData.type.equals("file")) {
                 if (!destinationList.getMetadataList().contains(mData)) {
-                    HashMap<String, Object> fileParams = new HashMap<>();
-                    for (Metadata data : destinationList.getMetadataList()) {
-                        if (data.type.equals("folder")) {
-                            if (data.name.equals(mData.parent.name)) {
-                                fileParams.put("parent_id", data.id);
-                                break;
+                    Instant now = Instant.now();
+                    Instant modified = Instant.parse(mData.modified);
+                    modified = modified.plusSeconds(300);
+                    if(modified.isAfter(now)) {
+                        HashMap<String, Object> fileParams = new HashMap<>();
+                        for (Metadata data : destinationList.getMetadataList()) {
+                            if (data.type.equals("folder")) {
+                                if (data.name.equals(mData.parent.name)) {
+                                    fileParams.put("parent_id", data.id);
+                                    break;
+                                }
+
                             }
+                        }
+
+
+                        fileParams.put("name", mData.name);
+                        if (fileParams.size() <= 1) {
+                            fileParams.put("parent_id", "root");
 
                         }
+                        fileParams.put("account", destinationAccount);
+                        com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
+                        logger.debug("File {} has been copied with params: {}", mData.name, fileParams);
                     }
-
-
-                    fileParams.put("name", mData.name);
-                    if (fileParams.size() <= 1) {
-                        fileParams.put("parent_id", "root");
-
-                    }
-                    fileParams.put("account", destinationAccount);
-                    com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
-                    logger.debug("File {} has been copied with params: {}", mData.name, fileParams);
-
                 }
             }
         }
@@ -453,11 +472,16 @@ public class ScannerWorker extends Thread {
                         }
                     }
                     if(!contains) {
-                        destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                        logger.debug("File {} has been deleted from destination storage (if)", data.name);
-                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                forRemove.add(destinationList.getMetadataList().get(i));
+                        Instant now = Instant.now();
+                        Instant modified = Instant.parse(data.modified);
+                        modified = modified.plusSeconds(300);
+                        if(modified.isBefore(now)) {
+                            destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                            logger.debug("File {} has been deleted from destination storage (if)", data.name);
+                            for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                    forRemove.add(destinationList.getMetadataList().get(i));
+                                }
                             }
                         }
                     }
@@ -466,15 +490,20 @@ public class ScannerWorker extends Thread {
                     for (Metadata file : sourceList.getMetadataList()) {
                         if (file.type.equals(data.type)) {
                             if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                                destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                                logger.debug("File {} has been deleted from destination storage (else)", data.name);
-                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                        forRemove.add(destinationList.getMetadataList().get(i));
+                                Instant now = Instant.now();
+                                Instant modified = Instant.parse(data.modified);
+                                modified = modified.plusSeconds(300);
+                                if (modified.isBefore(now)) {
+                                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                                    logger.debug("File {} has been deleted from destination storage (else)", data.name);
+                                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                            forRemove.add(destinationList.getMetadataList().get(i));
+                                        }
                                     }
+
+
                                 }
-
-
                             }
 
                             if(file.parent.name.equals(data.parent.name) && file.name.equals(data.name) && !file.size.equals(data.size)) {
@@ -529,26 +558,44 @@ public class ScannerWorker extends Thread {
         for (Metadata data : reversed) {
             if (data.type.equals("folder")) {
                 if (!sourceList.getMetadataList().contains(data)) {
-
-                    destinationStorage.delete(null, Folder.class, data.id);
-                    logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
-                    for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                        if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                            forRemove.add(destinationList.getMetadataList().get(i));
+                    Instant now = Instant.now();
+                    Instant modified;
+                    if(data.modified == null) {
+                        modified = Instant.parse(data.created);
+                    } else {
+                        modified = Instant.parse(data.modified);
+                    }
+                    modified = modified.plusSeconds(300);
+                    if(modified.isBefore(now)) {
+                        destinationStorage.delete(null, Folder.class, data.id);
+                        logger.debug(String.format("Folder %s has been deleted from destination storage (if)", data.name));
+                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                forRemove.add(destinationList.getMetadataList().get(i));
+                            }
                         }
                     }
 
                 } else {
                     for (Metadata file : sourceList.getMetadataList()) {
                         if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
-                            destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
-                            logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
-                            for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                    forRemove.add(destinationList.getMetadataList().get(i));
+                            Instant now = Instant.now();
+                            Instant modified;
+                            if(data.modified == null) {
+                                modified = Instant.parse(data.created);
+                            } else {
+                                modified = Instant.parse(data.modified);
+                            }
+                            modified = modified.plusSeconds(300);
+                            if(modified.isBefore(now)) {
+                                destinationStorage.delete(null, com.kloudless.model.Folder.class, data.id);
+                                logger.debug(String.format("Folder %s has been deleted from destination storage (else)", data.name));
+                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                    if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                        forRemove.add(destinationList.getMetadataList().get(i));
+                                    }
                                 }
                             }
-
                         }
                     }
                 }
