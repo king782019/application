@@ -341,6 +341,7 @@ public class ScannerWorker extends Thread {
                 if (!destinationList.getMetadataList().contains(mData)) {
                     Instant now = Instant.now();
                     Instant modified;
+
                     if(mData.modified == null) {
                         modified = Instant.parse(mData.created);
                     }else {
