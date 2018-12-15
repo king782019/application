@@ -323,7 +323,7 @@ public class CloudController {
      * @throws UnsupportedEncodingException
      */
     @SuppressWarnings("Duplicates")
-    private List<Metadata> fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+    private void fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
         logger.debug("In 'sycno' method");
 
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
@@ -372,7 +372,7 @@ public class CloudController {
                 sourceToken= user.getPcloudToken();
                 break;
             default:
-                return null;
+                return;
         }
 
         switch (syncAccount.getDestination()) {
@@ -405,7 +405,7 @@ public class CloudController {
                 destinationToken= user.getPcloudToken();
                 break;
             default:
-                return null;
+                return;
         }
 
         KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
@@ -628,11 +628,38 @@ public class CloudController {
 
         ScannerWorker worker = new ScannerWorker(user);
 
-        worker.setName(user.getUsername());
-        worker.start();
-        threads.add(worker);
+        int accountSum = 0;
 
-        return sourceList.getMetadataList();
+        if(user.getGoogleAccount() != null) {
+            accountSum++;
+        }
+        if (user.getDropboxAccount() != null) {
+            accountSum++;
+        }
+        if (user.getBoxAccount() != null) {
+            accountSum++;
+        }
+        if (user.getOnedriveAccount() != null) {
+            accountSum++;
+        }
+        if (user.getYandexAccount() != null) {
+            accountSum++;
+        }
+        if (user.getHidriveAccount() != null) {
+            accountSum++;
+        }
+        if (user.getPcloudAccount() != null) {
+            accountSum++;
+        }
+
+        if(accountSum >= 2) {
+            worker.setName(user.getUsername());
+            worker.start();
+            threads.add(worker);
+        }
+
+
+
     }
 
 
