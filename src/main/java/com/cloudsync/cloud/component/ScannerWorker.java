@@ -193,10 +193,6 @@ public class ScannerWorker extends Thread {
                         destinationList = contentsOfAccounts.get(i);
 
                         if (!destinationList.getMetadataList().contains(metadata)) {
-                            Instant now = Instant.now();
-                            Instant modified = Instant.parse(metadata.modified);
-                            modified = modified.plusSeconds(300);
-                            if (modified.isAfter(now)) {
                                 HashMap<String, Object> fileParams = new HashMap<>();
                                 for (Metadata data : destinationList.getMetadataList()) {
                                     if (data.type.equals("folder")) {
@@ -224,7 +220,7 @@ public class ScannerWorker extends Thread {
                                     }
                                 }
                                 logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
-                            }
+
                         }
 
 
