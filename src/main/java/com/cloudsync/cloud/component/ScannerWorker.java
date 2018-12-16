@@ -23,6 +23,7 @@ import java.util.*;
 
 public class ScannerWorker extends Thread {
 
+    private boolean firstStart = true;
     private User user;
     private volatile boolean running = true;
     private static final Logger logger = LogManager.getLogger(ScannerWorker.class);
@@ -43,7 +44,7 @@ public class ScannerWorker extends Thread {
 
             logger.debug("Worker executing now");
 
-            accounts = new ArrayList<>();
+            accounts = new ArrayList<WorkerAccount>();
             List<MetadataCounter> metadataCollection = new ArrayList<>();
 
             Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
@@ -81,6 +82,183 @@ public class ScannerWorker extends Thread {
             if (user.getPcloudAccount() != null) {
                 WorkerAccount provider = new WorkerAccount(user.getPcloudAccount(), user.getPcloudToken());
                 accounts.add(provider);
+            }
+
+            if(firstStart) {
+                ArrayList<MetadataCounter> contentsOfAccounts = new ArrayList<>();
+                ArrayList<String> accountsAccs = new ArrayList<>();
+                for(WorkerAccount account : accounts) {
+                    KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                    Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                    MetadataCollection source = null;
+                    try {
+                        source = sourceStorage.contents(null, Folder.class, "root");
+                    } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                    sourceList = addRootTags(sourceList);
+                    try {
+                        sourceList = listLoop(sourceStorage, sourceList);
+                    } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                        e.printStackTrace();
+                    }
+                    contentsOfAccounts.add(sourceList);
+                }
+                ArrayList<Metadata> objectsList = new ArrayList<>();
+                for(int i = 0; i < contentsOfAccounts.size() - 1; i++) {
+                    MetadataCounter list = contentsOfAccounts.get(i);
+                    MetadataCounter targetList = contentsOfAccounts.get(i+1);
+                    list.getMetadataList().removeAll(targetList.getMetadataList());
+                    objectsList.addAll(list.getMetadataList());
+                }
+                HashSet<Metadata> set = new HashSet<>(objectsList);
+                for(Metadata metadata : set) {
+                    int counter = Collections.frequency(objectsList, metadata);
+                    if(metadata.type.equals("file")){
+                        if(counter > 1) {
+                            MetadataCounter destinationList;
+                            for (int i = 0; i < contentsOfAccounts.size(); i++) {
+                                destinationList = contentsOfAccounts.get(i);
+
+                                if (!destinationList.getMetadataList().contains(metadata)) {
+                                    Instant now = Instant.now();
+                                    Instant modified = Instant.parse(metadata.modified);
+                                    modified = modified.plusSeconds(300);
+                                    if (modified.isAfter(now)) {
+                                        HashMap<String, Object> fileParams = new HashMap<>();
+                                        for (Metadata data : destinationList.getMetadataList()) {
+                                            if (data.type.equals("folder")) {
+                                                if (data.name.equals(metadata.parent.name)) {
+                                                    fileParams.put("parent_id", data.id);
+                                                    break;
+                                                }
+
+                                            }
+                                        }
+
+
+                                        fileParams.put("name", metadata.name);
+                                        if (fileParams.size() <= 1) {
+                                            fileParams.put("parent_id", "root");
+
+                                        }
+                                        fileParams.put("account", accountsAccs.get(i));
+                                        for (WorkerAccount account : accounts) {
+                                            try {
+                                                com.kloudless.model.File.copy(metadata.id, account.getAccount(), fileParams);
+                                            } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
+                                    }
+                                }
+
+
+                            }
+                        } else if (counter == 1) {
+                            for(WorkerAccount account : accounts) {
+                                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                                MetadataCollection source = null;
+                                try {
+                                    source = sourceStorage.contents(null, Folder.class, "root");
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                                sourceList = addRootTags(sourceList);
+                                try {
+                                    sourceList = listLoop(sourceStorage, sourceList);
+                                } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                    e.printStackTrace();
+                                }
+                                try {
+                                    sourceStorage.delete(null, com.kloudless.model.File.class, metadata.id);
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                    }
+
+                    if(metadata.type.equals("folder")) {
+                        if (counter > 1) {
+                            for (WorkerAccount account : accounts) {
+                                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                                MetadataCollection source = null;
+                                try {
+                                    source = sourceStorage.contents(null, Folder.class, "root");
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                                sourceList = addRootTags(sourceList);
+                                try {
+                                    sourceList = listLoop(sourceStorage, sourceList);
+                                } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                    e.printStackTrace();
+                                }
+
+                                HashMap<String, Object> fileParams = new HashMap<>();
+                                for (Metadata data : sourceList.getMetadataList()) {
+                                    if (data.type.equals("folder")) {
+                                        if (data.name.equals(metadata.parent.name)) {
+                                            fileParams.put("parent_id", data.id);
+                                            break;
+                                        }
+
+                                    }
+                                }
+
+                                fileParams.put("name", metadata.name);
+                                if (fileParams.size() <= 1) {
+                                    fileParams.put("parent_id", "root");
+                                }
+                                try {
+                                    sourceStorage.create(null, Folder.class, fileParams);
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else if (counter == 1) {
+                            for (WorkerAccount account : accounts) {
+                                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                                MetadataCollection source = null;
+                                try {
+                                    source = sourceStorage.contents(null, Folder.class, "root");
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                                sourceList = addRootTags(sourceList);
+                                try {
+                                    sourceList = listLoop(sourceStorage, sourceList);
+                                } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                    e.printStackTrace();
+                                }
+
+                                for (Metadata data : sourceList.getMetadataList()) {
+                                    if (data.type.equals("folder") && data.name.equals(metadata.name) && data.parent.name.equals(metadata.parent.name)) {
+                                        try {
+                                            sourceStorage.delete(null, Folder.class, data.id);
+                                        } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+
+                firstStart = false;
             }
 
             for (WorkerAccount account : accounts) {
@@ -204,50 +382,50 @@ public class ScannerWorker extends Thread {
 
         if(counter == 0) {
             for(WorkerAccount account : accounts) {
-                if(account.getToken().equals(token)){
-                    continue;
-                }
-                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
-                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
-                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
-                sourceList = addRootTags(sourceList);
-                sourceList = listLoop(sourceStorage, sourceList);
-
-                HashMap<String, Object> fileParams = new HashMap<>();
-                for (Metadata data : sourceList.getMetadataList()) {
-                    if (data.type.equals("folder")) {
-                        if (data.name.equals(sourceFolder.parent.name)) {
-                            fileParams.put("parent_id", data.id);
-                            break;
-                        }
-
-                    }
-                }
-
-                fileParams.put("name", sourceFolder.name);
-                if (fileParams.size() <= 1) {
-                    fileParams.put("parent_id", "root");
-                }
-                sourceStorage.create(null, Folder.class, fileParams);
+            if(account.getToken().equals(token)){
+                continue;
             }
-        } else {
-            for(WorkerAccount account : accounts) {
-                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
-                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
-                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
-                sourceList = addRootTags(sourceList);
-                sourceList = listLoop(sourceStorage, sourceList);
+            KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+            MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+            sourceList = addRootTags(sourceList);
+            sourceList = listLoop(sourceStorage, sourceList);
 
-                for (Metadata data : sourceList.getMetadataList()) {
-                    if(data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)){
-                        sourceStorage.delete(null, Folder.class, data.id);
+            HashMap<String, Object> fileParams = new HashMap<>();
+            for (Metadata data : sourceList.getMetadataList()) {
+                if (data.type.equals("folder")) {
+                    if (data.name.equals(sourceFolder.parent.name)) {
+                        fileParams.put("parent_id", data.id);
+                        break;
                     }
+
                 }
             }
 
+            fileParams.put("name", sourceFolder.name);
+            if (fileParams.size() <= 1) {
+                fileParams.put("parent_id", "root");
+            }
+            sourceStorage.create(null, Folder.class, fileParams);
         }
+    } else {
+        for(WorkerAccount account : accounts) {
+            KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+            MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+            sourceList = addRootTags(sourceList);
+            sourceList = listLoop(sourceStorage, sourceList);
+
+            for (Metadata data : sourceList.getMetadataList()) {
+                if(data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)){
+                    sourceStorage.delete(null, Folder.class, data.id);
+                }
+            }
+        }
+
+    }
 
     }
 
@@ -341,13 +519,7 @@ public class ScannerWorker extends Thread {
         for (Metadata data : destinationList.getMetadataList()) {
             if (data.type.equals("file")) {
                 if (!sourceList.getMetadataList().contains(data)) {
-                    Boolean contains = false;
-                    for(Metadata file : sourceList.getMetadataList()) {
-                        if(file.name.equals(data.name) && file.type.equals(data.type)) {
-                            contains = true;
-                        }
-                    }
-                    if(!contains) {
+
                         Instant now = Instant.now();
                         Instant modified = Instant.parse(data.modified);
                         modified = modified.plusSeconds(300);
@@ -360,7 +532,7 @@ public class ScannerWorker extends Thread {
                                 }
                             }
                         }
-                    }
+
 
                 } else {
                     for (Metadata file : sourceList.getMetadataList()) {

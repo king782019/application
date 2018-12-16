@@ -329,7 +329,7 @@ public class CloudController {
         String sourceAccount, sourceToken, destinationAccount, destinationToken;
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername());
-
+/*
         for(int i = 0; i < threads.size(); i++) {
             ScannerWorker thread = threads.get(i);
             if(thread.getName().equals(user.getUsername())) {
@@ -531,14 +531,11 @@ public class CloudController {
                                         forRemove.add(destinationList.getMetadataList().get(i));
                                     }
                                 }
-
                             }
                         }
                     }
                 }
-
             }
-
 
         destinationList.getMetadataList().removeAll(forRemove);
         forRemove.removeAll(forRemove);
@@ -624,7 +621,7 @@ public class CloudController {
                     logger.debug(String.format("File %s has been copied ", mData.name));
                 }
             }
-        }
+        }*/
 
         ScannerWorker worker = new ScannerWorker(user);
 
@@ -657,9 +654,6 @@ public class CloudController {
             worker.start();
             threads.add(worker);
         }
-
-
-
     }
 
 
