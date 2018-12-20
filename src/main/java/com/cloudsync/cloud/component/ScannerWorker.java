@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
@@ -131,8 +132,11 @@ public class ScannerWorker extends Thread {
 
                 }
                 HashSet<Metadata> set = new HashSet<>(objectsList);
-                while(set.size() != 0) {
-                    set = fileRemoveAndDeleteForSynchronization(set, contentsOfAccounts, objectsList, accountsAccs);
+                while(true) {
+                    set = fileRemoveAndDeleteForSynchronization(set, objectsList, accountsAccs);
+                    if(set.size() == 0) {
+                        break;
+                    }
                 }
 
                 firstStart = false;
@@ -183,8 +187,30 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    private HashSet<Metadata> fileRemoveAndDeleteForSynchronization(HashSet<Metadata> set, ArrayList<MetadataCounter> contentsOfAccounts, ArrayList<Metadata> objectsList, ArrayList<String> accountsAccs) {
+    private HashSet<Metadata> fileRemoveAndDeleteForSynchronization(HashSet<Metadata> set, ArrayList<Metadata> objectsList, ArrayList<String> accountsAccs) {
+        ArrayList<Metadata> removingSet = new ArrayList<>();
         for(Metadata metadata : set) {
+            ArrayList<MetadataCounter> contentsOfAccounts = new ArrayList<>();
+            for(WorkerAccount account : accounts) {
+                System.out.println("in Accounts");
+                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                MetadataCollection source = null;
+                try {
+                    source = sourceStorage.contents(null, Folder.class, "root");
+                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                sourceList = addRootTags(sourceList);
+                try {
+                    sourceList = listLoop(sourceStorage, sourceList);
+                } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                    e.printStackTrace();
+                }
+                contentsOfAccounts.add(sourceList);
+
+            }
             int counter = Collections.frequency(objectsList, metadata);
             if(metadata.type.equals("file")){
                 if(counter > 1) {
@@ -200,8 +226,8 @@ public class ScannerWorker extends Thread {
                     MetadataCounter destinationList;
                     for (int i = 0; i < contentsOfAccounts.size(); i++) {
                         destinationList = contentsOfAccounts.get(i);
-
-                        if (!destinationList.getMetadataList().contains(metadata)) {
+                        boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.name.equals(metadata.name) && x.type.equals(metadata.type));
+                        if (!exists) {
                                 HashMap<String, Object> fileParams = new HashMap<>();
                                 for (Metadata data : destinationList.getMetadataList()) {
                                     if (data.type.equals("folder")) {
@@ -222,8 +248,9 @@ public class ScannerWorker extends Thread {
                                 fileParams.put("account", accountsAccs.get(i));
                                 for (WorkerAccount account : accounts) {
                                     try {
+
                                         com.kloudless.model.File.copy(metadata.id, account.getAccount(), fileParams);
-                                        set.remove(metadata);
+                                        removingSet.add(metadata);
                                     } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
                                         e.printStackTrace();
                                     }
@@ -253,7 +280,7 @@ public class ScannerWorker extends Thread {
                         }
                         try {
                             sourceStorage.delete(null, com.kloudless.model.File.class, metadata.id);
-                            set.remove(metadata);
+                            removingSet.add(metadata);
                         } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -264,7 +291,6 @@ public class ScannerWorker extends Thread {
 
             if(metadata.type.equals("folder")) {
                 if (counter > 1) {
-                    Metadata object = new Metadata();
                     for (WorkerAccount account : accounts) {
                         KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
@@ -299,14 +325,23 @@ public class ScannerWorker extends Thread {
                         }
                         try {
                             sourceStorage.create(null, Folder.class, fileParams);
-                            object = metadata;
+                            removingSet.add(metadata);
                         } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
                     }
-                    set.remove(object);
+
                 } else if (counter == 1) {
                     for (WorkerAccount account : accounts) {
+                        boolean flag = false;
+                        for(Metadata metadata1 : set) {
+                            if(metadata1.type.equals("file")) {
+                                flag = true;
+                            }
+                        }
+                        if(flag) {
+                            continue;
+                        }
                         KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
                         MetadataCollection source = null;
@@ -327,7 +362,7 @@ public class ScannerWorker extends Thread {
                             if (data.type.equals("folder") && data.name.equals(metadata.name) && data.parent.name.equals(metadata.parent.name)) {
                                 try {
                                     sourceStorage.delete(null, Folder.class, data.id);
-                                    set.remove(data);
+                                    removingSet.add(metadata);
                                 } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
                                     e.printStackTrace();
                                 }
@@ -339,6 +374,7 @@ public class ScannerWorker extends Thread {
             }
 
         }
+        set.removeAll(removingSet);
         return set;
     }
 
