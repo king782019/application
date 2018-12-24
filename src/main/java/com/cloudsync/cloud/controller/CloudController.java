@@ -198,6 +198,7 @@ public class CloudController {
         return "OK";
     }
 
+    @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/addServiceDropbox", method = RequestMethod.POST)
     @ResponseBody
     public String addServiceDropbox(@RequestBody Provider provider, Authentication auth) throws UsernameNotFoundException, APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
@@ -266,6 +267,7 @@ public class CloudController {
         return "OK";
     }
 
+    @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/addServiceBox", method = RequestMethod.POST)
     @ResponseBody
     public String addServiceBox(@RequestBody Provider provider, Authentication auth) throws UsernameNotFoundException, AuthenticationException, UnsupportedEncodingException {
