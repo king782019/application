@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
@@ -36,6 +35,10 @@ public class ScannerWorker extends Thread {
 
     public void setRunning(boolean running) {
         this.running = running;
+    }
+
+    public void setFirstStart(Boolean firstStart) {
+        this.firstStart = firstStart;
     }
 
     @SuppressWarnings("Duplicates")

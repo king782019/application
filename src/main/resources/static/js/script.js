@@ -25,6 +25,28 @@ $(document).ready(function () {
         $(".lastTimeChecked").text("Last time checked: " + hours + ":" + minutes + ":" + seconds);
     });
 
+    $("#startWorker").click(function () {
+        $.ajax({
+            url: '/start',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function() {
+                console.log("successful start");
+            }
+        })
+    });
+
+    $("#stopWorker").click(function () {
+        $.ajax({
+            url: '/stop',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function() {
+                console.log("successful stop");
+            }
+        })
+    });
+
     $(function () {
         window.Kloudless.authenticator($("#test"), {
             client_id: 'UOgAgpNDvRVzJTE_3MeomH7bFsply7ZoWV5EAdRmsNCRbanW',
