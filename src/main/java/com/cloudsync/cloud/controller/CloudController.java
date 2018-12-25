@@ -16,14 +16,12 @@ import com.kloudless.model.MetadataCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -308,6 +306,7 @@ public class CloudController {
 
     @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/stop", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.OK)
     private void stopWorker(Authentication auth) {
 
         UserDetails user = (UserDetails) auth.getPrincipal();
@@ -328,8 +327,14 @@ public class CloudController {
 
     @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/start", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.OK)
     private void startWorker(Authentication auth) {
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        for (ScannerWorker thread : threads) {
+            if (thread.getName().equals(userDetails.getUsername())) {
+                return;
+            }
+        }
         User user = userRepository.findByUsername(userDetails.getUsername());
         ScannerWorker worker = new ScannerWorker(user);
 
@@ -364,6 +369,18 @@ public class CloudController {
         }
 
         logger.debug("worker starting");
+    }
+
+    @RequestMapping(value = "/remove", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.OK)
+    private void removeAccounts(Authentication auth){
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        User newUser = new User();
+        newUser.setId(user.getId());
+        newUser.setPassword(user.getPassword());
+        newUser.setUsername(user.getUsername());
+        userRepository.save(newUser);
     }
 
     //=======================New sync===========================

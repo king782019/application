@@ -13,17 +13,17 @@ $(document).ready(function () {
         obj.destination = $("input[name=destinationGroup]:checked").val();
     });
 
-    $(".btn-status").click(function () {
-        checkStatusGoogle();
-        checkStatusDropbox();
-        checkStatusOnedrive();
-        checkStatusBox();
+    $("#removeAccounts").click(function () {
+        $.ajax({
+            url: '/remove',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function() {
+                $(".status").text("Accounts removed");
+            }
 
-        var hours = new Date().getHours();
-        var minutes = new Date().getMinutes();
-        var seconds = new Date().getSeconds();
-        $(".lastTimeChecked").text("Last time checked: " + hours + ":" + minutes + ":" + seconds);
-    });
+        })
+    })
 
     $("#startWorker").click(function () {
         $.ajax({
@@ -31,7 +31,7 @@ $(document).ready(function () {
             type: 'POST',
             contentType: 'application/json',
             success: function() {
-                console.log("successful start");
+                $(".status").text("Successful start");
             }
         })
     });
@@ -43,6 +43,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             success: function() {
                 console.log("successful stop");
+                $(".status").text("Successful stop");
             }
         })
     });
