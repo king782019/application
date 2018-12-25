@@ -230,7 +230,7 @@ public class ScannerWorker extends Thread {
                     for (int i = 0; i < contentsOfAccounts.size(); i++) {
                         destinationList = contentsOfAccounts.get(i);
                         boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.name.equals(metadata.name) && x.type.equals(metadata.type));
-                        if (!exists) {
+                        if (!exists && !destinationList.getMetadataList().contains(metadata)) {
                                 HashMap<String, Object> fileParams = new HashMap<>();
                                 for (Metadata data : destinationList.getMetadataList()) {
                                     if (data.type.equals("folder")) {
@@ -251,14 +251,15 @@ public class ScannerWorker extends Thread {
                                 fileParams.put("account", accountsAccs.get(i));
                                 for (WorkerAccount account : accounts) {
                                     try {
-
                                         com.kloudless.model.File.copy(metadata.id, account.getAccount(), fileParams);
                                         removingSet.add(metadata);
+                                        logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
+                                        break;
                                     } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
                                         e.printStackTrace();
                                     }
                                 }
-                                logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
+
 
                         }
 
@@ -542,7 +543,8 @@ public class ScannerWorker extends Thread {
 
         for (Metadata mData : sourceList.getMetadataList()) {
             if (mData.type.equals("file")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
+                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.name.equals(mData.name));
+                if (!contains  && !destinationList.getMetadataList().contains(mData)) {
                     Instant now = Instant.now();
                     Instant modified = Instant.parse(mData.modified);
                     modified = modified.plusSeconds(300);

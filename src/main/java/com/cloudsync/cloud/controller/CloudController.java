@@ -315,6 +315,7 @@ public class CloudController {
                 thread.setRunning(false);
                 try {
                     thread.join();
+                    threads.remove(thread);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -411,6 +412,7 @@ public class CloudController {
                 thread.setRunning(false);
                 try {
                     thread.join();
+                    threads.remove(thread);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
