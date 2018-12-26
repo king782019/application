@@ -564,7 +564,6 @@ public class ScannerWorker extends Thread {
                         fileParams.put("name", mData.name);
                         if (fileParams.size() <= 1) {
                             fileParams.put("parent_id", "root");
-
                         }
                         fileParams.put("account", destinationAccount);
                         com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
