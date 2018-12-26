@@ -136,7 +136,7 @@ public class ScannerWorker extends Thread {
                 }
                 HashSet<Metadata> set = new HashSet<>(objectsList);
                 while(true) {
-                    set = fileRemoveAndDeleteForSynchronization(set, objectsList, accountsAccs);
+                    set = fileSendAndDeleteForSynchronization(set, objectsList, accountsAccs);
                     if(set.size() == 0) {
                         break;
                     }
@@ -190,7 +190,7 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    private HashSet<Metadata> fileRemoveAndDeleteForSynchronization(HashSet<Metadata> set, ArrayList<Metadata> objectsList, ArrayList<String> accountsAccs) {
+    private HashSet<Metadata> fileSendAndDeleteForSynchronization(HashSet<Metadata> set, ArrayList<Metadata> objectsList, ArrayList<String> accountsAccs) {
         ArrayList<Metadata> removingSet = new ArrayList<>();
         for(Metadata metadata : set) {
             ArrayList<MetadataCounter> contentsOfAccounts = new ArrayList<>();
