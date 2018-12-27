@@ -124,7 +124,7 @@ public class ScannerWorker extends Thread {
                         List<Metadata> forRemove = new ArrayList<>();
                         for(int k = 0; k < list.size(); k++) {
                             for(int m = 0; m < objectsList.size(); m++) {
-                                if(objectsList.get(m).name.equals(list.get(k).name) && objectsList.get(m).id.equals(list.get(k).id)){
+                                if(objectsList.get(m).mime_type.equals(list.get(k).mime_type) && objectsList.get(m).id.equals(list.get(k).id)){
                                     forRemove.add(list.get(k));
                                 }
                             }
@@ -229,7 +229,7 @@ public class ScannerWorker extends Thread {
                     MetadataCounter destinationList;
                     for (int i = 0; i < contentsOfAccounts.size(); i++) {
                         destinationList = contentsOfAccounts.get(i);
-                        boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.name.equals(metadata.name) && x.type.equals(metadata.type));
+                        boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(metadata.mime_type) && x.type.equals(metadata.type));
                         if (!exists && !destinationList.getMetadataList().contains(metadata)) {
                                 HashMap<String, Object> fileParams = new HashMap<>();
                                 for (Metadata data : destinationList.getMetadataList()) {
@@ -363,7 +363,7 @@ public class ScannerWorker extends Thread {
                         }
 
                         for (Metadata data : sourceList.getMetadataList()) {
-                            if (data.type.equals("folder") && data.name.equals(metadata.name) && data.parent.name.equals(metadata.parent.name)) {
+                            if (data.type.equals("folder") && data.mime_type.equals(metadata.mime_type) && data.parent.name.equals(metadata.parent.name)) {
                                 try {
                                     sourceStorage.delete(null, Folder.class, data.id);
                                     removingSet.add(metadata);
@@ -390,7 +390,8 @@ public class ScannerWorker extends Thread {
 
             sourceList.getMetadataList().get(i).parent.Id = "root";
             sourceList.getMetadataList().get(i).parent.name = "root";
-
+            String noWhitespace = sourceList.getMetadataList().get(i).name.replaceAll("\\s", "");
+            sourceList.getMetadataList().get(i).mime_type = noWhitespace.replaceAll("\\(.*\\)", "");
             if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
                 num = i;
             }
@@ -543,8 +544,8 @@ public class ScannerWorker extends Thread {
 
         for (Metadata mData : sourceList.getMetadataList()) {
             if (mData.type.equals("file")) {
-                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.name.equals(mData.name));
-                if (!contains  && !destinationList.getMetadataList().contains(mData)) {
+                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(mData.mime_type) && x.parent.name.equals(mData.parent.name));
+                if (!contains) {
                     Instant now = Instant.now();
                     Instant modified = Instant.parse(mData.modified);
                     modified = modified.plusSeconds(300);
@@ -597,7 +598,8 @@ public class ScannerWorker extends Thread {
         List<Metadata> forRemove = new ArrayList<>();
         for (Metadata data : destinationList.getMetadataList()) {
             if (data.type.equals("file")) {
-                if (!sourceList.getMetadataList().contains(data)) {
+                boolean contains = sourceList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(data.mime_type) && x.parent.name.equals(data.parent.name));
+                if (!contains) {
 
                         Instant now = Instant.now();
                         Instant modified = Instant.parse(data.modified);
@@ -616,7 +618,7 @@ public class ScannerWorker extends Thread {
                 } else {
                     for (Metadata file : sourceList.getMetadataList()) {
                         if (file.type.equals(data.type)) {
-                            if (!file.parent.name.equals(data.parent.name) && file.name.equals(data.name)) {
+                            if (!file.parent.name.equals(data.parent.name) && file.mime_type.equals(data.mime_type)) {
                                 Instant now = Instant.now();
                                 Instant modified = Instant.parse(data.modified);
                                 modified = modified.plusSeconds(300);
@@ -633,7 +635,7 @@ public class ScannerWorker extends Thread {
                                 }
                             }
 
-                            if(file.parent.name.equals(data.parent.name) && file.name.equals(data.name) && !file.size.equals(data.size)) {
+                            if(file.parent.name.equals(data.parent.name) && file.mime_type.equals(data.mime_type) && !file.size.equals(data.size)) {
 
                                 Instant instant1 = Instant.parse(file.modified);
                                 Instant instant2 = Instant.parse(data.modified);
@@ -663,7 +665,7 @@ public class ScannerWorker extends Thread {
                                 }
 
                                 for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                    if(destinationList.getMetadataList().get(i).name.equals(data.name) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
+                                    if(destinationList.getMetadataList().get(i).mime_type.equals(data.mime_type) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
                                         destinationList.getMetadataList().get(i).modified = file.modified;
                                     }
                                 }
