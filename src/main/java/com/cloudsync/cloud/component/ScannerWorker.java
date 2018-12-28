@@ -577,6 +577,7 @@ public class ScannerWorker extends Thread {
 
         return sourceList;
     }
+    //
 
     @SuppressWarnings("Duplicates")
     public MetadataCounter requestDelete(String sourceAccount, String sourceToken, String destinationAccount, String destinationToken) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException, ParseException {
