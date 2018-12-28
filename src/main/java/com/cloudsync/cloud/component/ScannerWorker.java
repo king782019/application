@@ -29,7 +29,7 @@ public class ScannerWorker extends Thread {
     private static final Logger logger = LogManager.getLogger(ScannerWorker.class);
     private ArrayList<WorkerAccount> accounts;
 
-    public ScannerWorker(User user){
+    public ScannerWorker(User user) {
         this.user = user;
     }
 
@@ -44,7 +44,7 @@ public class ScannerWorker extends Thread {
     @SuppressWarnings("Duplicates")
     @Override
     public void run() {
-        while(running) {
+        while (running) {
 
             logger.debug("Worker executing now");
 
@@ -88,11 +88,11 @@ public class ScannerWorker extends Thread {
                 accounts.add(provider);
             }
 
-            if(firstStart) {
+            if (firstStart) {
                 System.out.println("in firstStart");
                 ArrayList<MetadataCounter> contentsOfAccounts = new ArrayList<>();
                 ArrayList<String> accountsAccs = new ArrayList<>();
-                for(WorkerAccount account : accounts) {
+                for (WorkerAccount account : accounts) {
                     System.out.println("in Accounts");
                     KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                     Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
@@ -113,18 +113,18 @@ public class ScannerWorker extends Thread {
                     accountsAccs.add(account.getAccount());
                 }
                 ArrayList<Metadata> objectsList = new ArrayList<>();
-                for(int i = 0; i < contentsOfAccounts.size(); i++) {
-                    for(int j = 0; j < contentsOfAccounts.size(); j++) {
-                        if(i == j) {
+                for (int i = 0; i < contentsOfAccounts.size(); i++) {
+                    for (int j = 0; j < contentsOfAccounts.size(); j++) {
+                        if (i == j) {
                             continue;
                         }
                         List<Metadata> list = new ArrayList<>(contentsOfAccounts.get(i).getMetadataList());
                         List<Metadata> targetList = new ArrayList<>(contentsOfAccounts.get(j).getMetadataList());
                         list.removeAll(targetList);
                         List<Metadata> forRemove = new ArrayList<>();
-                        for(int k = 0; k < list.size(); k++) {
-                            for(int m = 0; m < objectsList.size(); m++) {
-                                if(objectsList.get(m).mime_type.equals(list.get(k).mime_type) && objectsList.get(m).id.equals(list.get(k).id)){
+                        for (int k = 0; k < list.size(); k++) {
+                            for (int m = 0; m < objectsList.size(); m++) {
+                                if (objectsList.get(m).mime_type.equals(list.get(k).mime_type) && objectsList.get(m).id.equals(list.get(k).id)) {
                                     forRemove.add(list.get(k));
                                 }
                             }
@@ -135,9 +135,9 @@ public class ScannerWorker extends Thread {
 
                 }
                 HashSet<Metadata> set = new HashSet<>(objectsList);
-                while(true) {
+                while (true) {
                     set = fileSendAndDeleteForSynchronization(set, objectsList, accountsAccs);
-                    if(set.size() == 0) {
+                    if (set.size() == 0) {
                         break;
                     }
                 }
@@ -192,9 +192,9 @@ public class ScannerWorker extends Thread {
     @SuppressWarnings("Duplicates")
     private HashSet<Metadata> fileSendAndDeleteForSynchronization(HashSet<Metadata> set, ArrayList<Metadata> objectsList, ArrayList<String> accountsAccs) {
         ArrayList<Metadata> removingSet = new ArrayList<>();
-        for(Metadata metadata : set) {
+        for (Metadata metadata : set) {
             ArrayList<MetadataCounter> contentsOfAccounts = new ArrayList<>();
-            for(WorkerAccount account : accounts) {
+            for (WorkerAccount account : accounts) {
                 System.out.println("in Accounts");
                 KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                 Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
@@ -215,15 +215,15 @@ public class ScannerWorker extends Thread {
 
             }
             int counter = Collections.frequency(objectsList, metadata);
-            if(metadata.type.equals("file")){
-                if(counter > 1) {
+            if (metadata.type.equals("file")) {
+                if (counter > 1) {
                     boolean flag = false;
-                    for(Metadata metadata1 : set) {
-                        if(metadata1.type.equals("folder")) {
+                    for (Metadata metadata1 : set) {
+                        if (metadata1.type.equals("folder")) {
                             flag = true;
                         }
                     }
-                    if(flag) {
+                    if (flag) {
                         continue;
                     }
                     MetadataCounter destinationList;
@@ -231,34 +231,34 @@ public class ScannerWorker extends Thread {
                         destinationList = contentsOfAccounts.get(i);
                         boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(metadata.mime_type) && x.type.equals(metadata.type));
                         if (!exists && !destinationList.getMetadataList().contains(metadata)) {
-                                HashMap<String, Object> fileParams = new HashMap<>();
-                                for (Metadata data : destinationList.getMetadataList()) {
-                                    if (data.type.equals("folder")) {
-                                        if (data.name.equals(metadata.parent.name)) {
-                                            fileParams.put("parent_id", data.id);
-                                            break;
-                                        }
-
-                                    }
-                                }
-
-
-                                fileParams.put("name", metadata.name);
-                                if (fileParams.size() <= 1) {
-                                    fileParams.put("parent_id", "root");
-
-                                }
-                                fileParams.put("account", accountsAccs.get(i));
-                                for (WorkerAccount account : accounts) {
-                                    try {
-                                        com.kloudless.model.File.copy(metadata.id, account.getAccount(), fileParams);
-                                        removingSet.add(metadata);
-                                        logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
+                            HashMap<String, Object> fileParams = new HashMap<>();
+                            for (Metadata data : destinationList.getMetadataList()) {
+                                if (data.type.equals("folder")) {
+                                    if (data.name.equals(metadata.parent.name)) {
+                                        fileParams.put("parent_id", data.id);
                                         break;
-                                    } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
-                                        e.printStackTrace();
                                     }
+
                                 }
+                            }
+
+
+                            fileParams.put("name", metadata.name);
+                            if (fileParams.size() <= 1) {
+                                fileParams.put("parent_id", "root");
+
+                            }
+                            fileParams.put("account", accountsAccs.get(i));
+                            for (WorkerAccount account : accounts) {
+                                try {
+                                    com.kloudless.model.File.copy(metadata.id, account.getAccount(), fileParams);
+                                    removingSet.add(metadata);
+                                    logger.debug("File {} has been copied with params: {}", metadata.name, fileParams);
+                                    break;
+                                } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
 
                         }
@@ -266,7 +266,7 @@ public class ScannerWorker extends Thread {
 
                     }
                 } else if (counter == 1) {
-                    for(WorkerAccount account : accounts) {
+                    for (WorkerAccount account : accounts) {
                         KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                         Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
                         MetadataCollection source = null;
@@ -293,7 +293,7 @@ public class ScannerWorker extends Thread {
 
             }
 
-            if(metadata.type.equals("folder")) {
+            if (metadata.type.equals("folder")) {
                 if (counter > 1) {
                     for (WorkerAccount account : accounts) {
                         KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
@@ -338,12 +338,12 @@ public class ScannerWorker extends Thread {
                 } else if (counter == 1) {
                     for (WorkerAccount account : accounts) {
                         boolean flag = false;
-                        for(Metadata metadata1 : set) {
-                            if(metadata1.type.equals("file")) {
+                        for (Metadata metadata1 : set) {
+                            if (metadata1.type.equals("file")) {
                                 flag = true;
                             }
                         }
-                        if(flag) {
+                        if (flag) {
                             continue;
                         }
                         KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
@@ -419,7 +419,8 @@ public class ScannerWorker extends Thread {
                 for (int j = 0; j < temp.objects.size(); j++) {
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
-
+                    String noWhitespace = temp.objects.get(j).name.replaceAll("\\s", "");
+                    temp.objects.get(j).mime_type = noWhitespace.replaceAll("\\(.*\\)", "");
                 }
                 break;
             }
@@ -442,8 +443,8 @@ public class ScannerWorker extends Thread {
     @SuppressWarnings("Duplicates")
     private void sendOrDeleteFolders(Metadata sourceFolder, String token) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
         int counter = 0;
-        for(WorkerAccount account : accounts) {
-            if(account.getToken().equals(token)){
+        for (WorkerAccount account : accounts) {
+            if (account.getToken().equals(token)) {
                 continue;
             }
             KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
@@ -453,62 +454,61 @@ public class ScannerWorker extends Thread {
             sourceList = addRootTags(sourceList);
             sourceList = listLoop(sourceStorage, sourceList);
 
-            for(Metadata folder : sourceList.getMetadataList()) {
-                if(folder.type.equals("folder") && folder.name.equals(sourceFolder.name)) {
+            for (Metadata folder : sourceList.getMetadataList()) {
+                if (folder.type.equals("folder") && folder.name.equals(sourceFolder.name)) {
                     counter++;
                 }
             }
         }
 
-        if(counter == 0) {
-            for(WorkerAccount account : accounts) {
-            if(account.getToken().equals(token)){
-                continue;
-            }
-            KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
-            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-            MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
-            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
-            sourceList = addRootTags(sourceList);
-            sourceList = listLoop(sourceStorage, sourceList);
+        if (counter == 0) {
+            for (WorkerAccount account : accounts) {
+                if (account.getToken().equals(token)) {
+                    continue;
+                }
+                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                sourceList = addRootTags(sourceList);
+                sourceList = listLoop(sourceStorage, sourceList);
 
-            HashMap<String, Object> fileParams = new HashMap<>();
-            for (Metadata data : sourceList.getMetadataList()) {
-                if (data.type.equals("folder")) {
-                    if (data.name.equals(sourceFolder.parent.name)) {
-                        fileParams.put("parent_id", data.id);
-                        break;
+                HashMap<String, Object> fileParams = new HashMap<>();
+                for (Metadata data : sourceList.getMetadataList()) {
+                    if (data.type.equals("folder")) {
+                        if (data.name.equals(sourceFolder.parent.name)) {
+                            fileParams.put("parent_id", data.id);
+                            break;
+                        }
+
                     }
+                }
 
+                fileParams.put("name", sourceFolder.name);
+                if (fileParams.size() <= 1) {
+                    fileParams.put("parent_id", "root");
+                }
+                sourceStorage.create(null, Folder.class, fileParams);
+            }
+        } else {
+            for (WorkerAccount account : accounts) {
+                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                sourceList = addRootTags(sourceList);
+                sourceList = listLoop(sourceStorage, sourceList);
+
+                for (Metadata data : sourceList.getMetadataList()) {
+                    if (data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)) {
+                        sourceStorage.delete(null, Folder.class, data.id);
+                    }
                 }
             }
 
-            fileParams.put("name", sourceFolder.name);
-            if (fileParams.size() <= 1) {
-                fileParams.put("parent_id", "root");
-            }
-            sourceStorage.create(null, Folder.class, fileParams);
-        }
-    } else {
-        for(WorkerAccount account : accounts) {
-            KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
-            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-            MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
-            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
-            sourceList = addRootTags(sourceList);
-            sourceList = listLoop(sourceStorage, sourceList);
-
-            for (Metadata data : sourceList.getMetadataList()) {
-                if(data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)){
-                    sourceStorage.delete(null, Folder.class, data.id);
-                }
-            }
         }
 
     }
-
-    }
-
 
 
     @SuppressWarnings("Duplicates")
@@ -535,10 +535,10 @@ public class ScannerWorker extends Thread {
         for (Metadata mData : reversed) {
             if (mData.type.equals("folder")) {
                 if (!destinationList.getMetadataList().contains(mData)) {
-                        sendOrDeleteFolders(mData, sourceToken);
-                    }
+                    sendOrDeleteFolders(mData, sourceToken);
                 }
             }
+        }
 
 
 
@@ -549,7 +549,7 @@ public class ScannerWorker extends Thread {
                     Instant now = Instant.now();
                     Instant modified = Instant.parse(mData.modified);
                     modified = modified.plusSeconds(300);
-                    if(modified.isAfter(now)) {
+                    if (modified.isAfter(now)) {
                         HashMap<String, Object> fileParams = new HashMap<>();
                         for (Metadata data : destinationList.getMetadataList()) {
                             if (data.type.equals("folder")) {
@@ -564,6 +564,7 @@ public class ScannerWorker extends Thread {
 
                         fileParams.put("name", mData.name);
                         if (fileParams.size() <= 1) {
+                            if(!mData.parent.name.equals("root")) break;
                             fileParams.put("parent_id", "root");
                         }
                         fileParams.put("account", destinationAccount);
@@ -601,18 +602,18 @@ public class ScannerWorker extends Thread {
                 boolean contains = sourceList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(data.mime_type) && x.parent.name.equals(data.parent.name));
                 if (!contains) {
 
-                        Instant now = Instant.now();
-                        Instant modified = Instant.parse(data.modified);
-                        modified = modified.plusSeconds(300);
-                        if(modified.isBefore(now)) {
-                            destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                            logger.debug("File {} has been deleted from destination storage (if)", data.name);
-                            for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
-                                    forRemove.add(destinationList.getMetadataList().get(i));
-                                }
+                    Instant now = Instant.now();
+                    Instant modified = Instant.parse(data.modified);
+                    modified = modified.plusSeconds(300);
+                    if (modified.isBefore(now)) {
+                        destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                        logger.debug("File {} has been deleted from destination storage (if)", data.name);
+                        for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                            if (data.id.equals(destinationList.getMetadataList().get(i).id)) {
+                                forRemove.add(destinationList.getMetadataList().get(i));
                             }
                         }
+                    }
 
 
                 } else {
@@ -635,12 +636,12 @@ public class ScannerWorker extends Thread {
                                 }
                             }
 
-                            if(file.parent.name.equals(data.parent.name) && file.mime_type.equals(data.mime_type) && !file.size.equals(data.size)) {
+                            if (file.parent.name.equals(data.parent.name) && file.mime_type.equals(data.mime_type) && !file.size.equals(data.size)) {
 
                                 Instant instant1 = Instant.parse(file.modified);
                                 Instant instant2 = Instant.parse(data.modified);
 
-                                if(instant1.isAfter(instant2)) {
+                                if (instant1.isAfter(instant2)) {
                                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                                     HashMap<String, Object> fileParams = new HashMap<>();
                                     for (Metadata Fdata : destinationList.getMetadataList()) {
@@ -664,8 +665,8 @@ public class ScannerWorker extends Thread {
                                     logger.debug(String.format("File %s has been recopied ", file.name));
                                 }
 
-                                for(int i = 0; i < destinationList.getMetadataList().size(); i++) {
-                                    if(destinationList.getMetadataList().get(i).mime_type.equals(data.mime_type) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
+                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                    if (destinationList.getMetadataList().get(i).mime_type.equals(data.mime_type) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
                                         destinationList.getMetadataList().get(i).modified = file.modified;
                                     }
                                 }
