@@ -49,7 +49,7 @@
 
     <div class="row">
         <div class="col">
-            <p><b>Choose source account:</b></p>
+        <h2>Connected accounts:</h2>
             <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">Google Drive</input><br>
 
             <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">DropBox</input><br>
@@ -59,9 +59,12 @@
             <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}">Yandex</input><br>
             <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}">HiDrive</input><br>
             <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}">pCloud</input><br>
-            <button class="btn btn-primary" id="startWorker">Start</button>
-            <button class="btn btn-primary" id="stopWorker">Stop</button>
-            <button class="btn btn-primary" id="removeAccounts">Remove Accounts</button>
+            <button class="btn btn-success" id="startWorker">Start</button>
+            <button class="btn btn-danger" id="stopWorker">Stop</button>
+            <br>
+            <br>
+            <button class="btn btn-secondary" id="removeAccounts">Remove Accounts</button>
+
             <p class="status"></p>
         </div>
 
