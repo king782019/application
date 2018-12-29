@@ -83,25 +83,7 @@ public class CloudController {
         currentUser.setPcloudAccount(provider.getAccount().getId());
         currentUser.setPcloudToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        SyncAccount account = new SyncAccount();
-        if(currentUser.getGoogleAccount() != null) {
-            account.setSource("google");
-        } else if (currentUser.getDropboxAccount() != null) {
-            account.setSource("dropbox");
-        } else if (currentUser.getBoxAccount() != null) {
-            account.setSource("box");
-        } else if (currentUser.getOnedriveAccount() != null) {
-            account.setSource("onedrive");
-        } else if (currentUser.getYandexAccount() != null) {
-            account.setSource("yandex");
-        } else if (currentUser.getHidriveAccount() != null) {
-            account.setSource("hidrive");
-        }else {
-            return null;
-        }
 
-        account.setDestination("pcloud");
-        fullSyncronize(account, auth);
         return "OK";
     }
 
@@ -112,24 +94,7 @@ public class CloudController {
         currentUser.setHidriveAccount(provider.getAccount().getId());
         currentUser.setHidriveToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        SyncAccount account = new SyncAccount();
-        if(currentUser.getGoogleAccount() != null) {
-            account.setSource("google");
-        } else if (currentUser.getDropboxAccount() != null) {
-            account.setSource("dropbox");
-        } else if (currentUser.getBoxAccount() != null) {
-            account.setSource("box");
-        } else if (currentUser.getOnedriveAccount() != null) {
-            account.setSource("onedrive");
-        } else if (currentUser.getYandexAccount() != null) {
-            account.setSource("yandex");
-        } else if (currentUser.getPcloudAccount() != null) {
-            account.setSource("pcloud");
-        }else {
-            return null;
-        }
-        account.setDestination("hidrive");
-        fullSyncronize(account, auth);
+
         return "OK";
     }
 
@@ -140,24 +105,7 @@ public class CloudController {
         currentUser.setYandexAccount(provider.getAccount().getId());
         currentUser.setYandexToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        SyncAccount account = new SyncAccount();
-        if(currentUser.getGoogleAccount() != null) {
-            account.setSource("google");
-        } else if (currentUser.getDropboxAccount() != null) {
-            account.setSource("dropbox");
-        } else if (currentUser.getBoxAccount() != null) {
-            account.setSource("box");
-        } else if (currentUser.getOnedriveAccount() != null) {
-            account.setSource("onedrive");
-        } else if (currentUser.getPcloudAccount() != null) {
-            account.setSource("pcloud");
-        } else if (currentUser.getHidriveAccount() != null) {
-            account.setSource("hidrive");
-        }else {
-            return null;
-        }
-        account.setDestination("yandex");
-        fullSyncronize(account, auth);
+
         return "OK";
     }
 
@@ -171,24 +119,7 @@ public class CloudController {
             currentUser.setGoogleAccount(provider.getAccount().getId());
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            SyncAccount account = new SyncAccount();
-            if(currentUser.getPcloudAccount() != null) {
-                account.setSource("pcloud");
-            } else if (currentUser.getDropboxAccount() != null) {
-                account.setSource("dropbox");
-            } else if (currentUser.getBoxAccount() != null) {
-                account.setSource("box");
-            } else if (currentUser.getOnedriveAccount() != null) {
-                account.setSource("onedrive");
-            } else if (currentUser.getYandexAccount() != null) {
-                account.setSource("yandex");
-            } else if (currentUser.getHidriveAccount() != null) {
-                account.setSource("hidrive");
-            }else {
-                return null;
-            }
-            account.setDestination("google");
-            fullSyncronize(account, auth);
+
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -206,24 +137,7 @@ public class CloudController {
             currentUser.setDropboxAccount(provider.getAccount().getId());
             currentUser.setDropboxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            SyncAccount account = new SyncAccount();
-            if(currentUser.getGoogleAccount() != null) {
-                account.setSource("google");
-            } else if (currentUser.getPcloudAccount() != null) {
-                account.setSource("pcloud");
-            } else if (currentUser.getBoxAccount() != null) {
-                account.setSource("box");
-            } else if (currentUser.getOnedriveAccount() != null) {
-                account.setSource("onedrive");
-            } else if (currentUser.getYandexAccount() != null) {
-                account.setSource("yandex");
-            } else if (currentUser.getHidriveAccount() != null) {
-                account.setSource("hidrive");
-            }else {
-                return null;
-            }
-            account.setDestination("dropbox");
-            fullSyncronize(account, auth);
+
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -240,24 +154,7 @@ public class CloudController {
             currentUser.setOnedriveAccount(provider.getAccount().getId());
             currentUser.setOnedriveToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            SyncAccount account = new SyncAccount();
-            if(currentUser.getGoogleAccount() != null) {
-                account.setSource("google");
-            } else if (currentUser.getDropboxAccount() != null) {
-                account.setSource("dropbox");
-            } else if (currentUser.getBoxAccount() != null) {
-                account.setSource("box");
-            } else if (currentUser.getPcloudAccount() != null) {
-                account.setSource("pcloud");
-            } else if (currentUser.getYandexAccount() != null) {
-                account.setSource("yandex");
-            } else if (currentUser.getHidriveAccount() != null) {
-                account.setSource("hidrive");
-            } else {
-                return null;
-            }
-            account.setDestination("onedrive");
-            fullSyncronize(account, auth);
+
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -275,29 +172,10 @@ public class CloudController {
             currentUser.setBoxAccount(provider.getAccount().getId());
             currentUser.setBoxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            SyncAccount account = new SyncAccount();
-            if(currentUser.getGoogleAccount() != null) {
-                account.setSource("google");
-            } else if (currentUser.getDropboxAccount() != null) {
-                account.setSource("dropbox");
-            } else if (currentUser.getPcloudAccount() != null) {
-                account.setSource("pcloud");
-            } else if (currentUser.getOnedriveAccount() != null) {
-                account.setSource("onedrive");
-            } else if (currentUser.getYandexAccount() != null) {
-                account.setSource("yandex");
-            } else if (currentUser.getHidriveAccount() != null) {
-                account.setSource("hidrive");
-            } else {
-                return null;
-            }
-            account.setDestination("box");
-            fullSyncronize(account, auth);
+
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
-        } catch (APIConnectionException | InvalidRequestException | APIException e) {
-            e.printStackTrace();
         }
         return "OK";
     }
@@ -383,78 +261,6 @@ public class CloudController {
         newUser.setUsername(user.getUsername());
         userRepository.save(newUser);
     }
-
-    //=======================New sync===========================
-
-    /** Full Synchronize
-     *
-     * @param syncAccount
-     * @param auth
-     * @return
-     * @throws UsernameNotFoundException
-     * @throws APIException
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws UnsupportedEncodingException
-     */
-    @SuppressWarnings("Duplicates")
-    private void fullSyncronize(SyncAccount syncAccount, Authentication auth) throws UsernameNotFoundException, APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
-        logger.debug("In 'sycno' method");
-
-        String sourceAccount, sourceToken, destinationAccount, destinationToken;
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername());
-
-        for(int i = 0; i < threads.size(); i++) {
-            ScannerWorker thread = threads.get(i);
-            if(thread.getName().equals(user.getUsername())) {
-                thread.setRunning(false);
-                try {
-                    thread.join();
-                    threads.remove(thread);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        ScannerWorker worker = new ScannerWorker(user);
-
-        int accountSum = 0;
-
-        if(user.getGoogleAccount() != null) {
-            accountSum++;
-        }
-        if (user.getDropboxAccount() != null) {
-            accountSum++;
-        }
-        if (user.getBoxAccount() != null) {
-            accountSum++;
-        }
-        if (user.getOnedriveAccount() != null) {
-            accountSum++;
-        }
-        if (user.getYandexAccount() != null) {
-            accountSum++;
-        }
-        if (user.getHidriveAccount() != null) {
-            accountSum++;
-        }
-        if (user.getPcloudAccount() != null) {
-            accountSum++;
-        }
-
-        if(accountSum >= 2) {
-            worker.setName(user.getUsername());
-            worker.setFirstStart(false);
-            worker.start();
-            threads.add(worker);
-        }
-    }
-
-
-
 
 
     /**
