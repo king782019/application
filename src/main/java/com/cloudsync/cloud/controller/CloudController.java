@@ -182,6 +182,18 @@ public class CloudController {
 
     //====================Add providers=========================
 
+    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    @ResponseBody
+    private String checkStatus(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        for(ScannerWorker thread : threads) {
+            if(thread.getName().equals(userDetails.getUsername())) {
+                return "Worker is running";
+            }
+        }
+        return "Worker stopped";
+    }
+
     @SuppressWarnings("Duplicates")
     @RequestMapping(value = "/stop", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)

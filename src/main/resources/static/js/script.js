@@ -48,6 +48,16 @@ $(document).ready(function () {
         })
     });
 
+    $("#chechStatus").click(function () {
+        $.ajax({
+            url: '/status',
+            type: 'POST',
+            success: function(res) {
+                $(".status").text(res.toString())
+            }
+        })
+    })
+
     $(function () {
         window.Kloudless.authenticator($("#test"), {
             client_id: 'UOgAgpNDvRVzJTE_3MeomH7bFsply7ZoWV5EAdRmsNCRbanW',
