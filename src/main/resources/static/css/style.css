@@ -21,3 +21,8 @@ input {
     display: inline;
 }
 
+.radioImage {
+    height: 30px;
+    width: 30px;
+}
+

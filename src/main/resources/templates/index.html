@@ -49,16 +49,16 @@
 
     <div class="row">
         <div class="col">
-        <h2>Connected accounts:</h2>
-            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">Google Drive</input><br>
+        <h3>Connected accounts:</h3>
+            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}"><label for="s1"><img class="radioImage" th:src="@{image/google.png}" /> Google Drive</label></input><br>
 
-            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">DropBox</input><br>
+            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"><label for="s2"><img class="radioImage" th:src="@{image/dropbox.png}" /> DropBox</label></input><br>
 
-            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">OneDrive</input><br>
-            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}">Box</input><br>
-            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}">Yandex</input><br>
-            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}">HiDrive</input><br>
-            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}">pCloud</input><br>
+            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}"><label for="s3"><img class="radioImage" th:src="@{image/onedrive.png}" /> OneDrive</label></input><br>
+            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}"><label for="s4"><img class="radioImage" th:src="@{image/box.png}" /></label> Box</input><br>
+            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}"><label for="s5"><img class="radioImage" th:src="@{image/yandex.png}" /> Yandex</label></input><br>
+            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}"><label for="s6"><img class="radioImage" th:src="@{image/hidrive.png}" /> HiDrive</label></input><br>
+            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}"><label for="s7"><img class="radioImage" th:src="@{image/pcloud.png}" /> pCloud</label></input><br>
             <button class="btn btn-success" id="startWorker">Start</button>
             <button class="btn btn-danger" id="stopWorker">Stop</button>
             <br>
