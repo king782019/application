@@ -541,7 +541,11 @@ public class ScannerWorker extends Thread {
 
                 fileParams.put("name", sourceFolder.name);
                 if (fileParams.size() <= 1) {
-                    fileParams.put("parent_id", "root");
+                    if(sourceFolder.parent.name.equals("root")) {
+                        fileParams.put("parent_id", "root");
+                    } else {
+                        continue;
+                    }
                 }
                 sourceStorage.create(null, Folder.class, fileParams);
             }
