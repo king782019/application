@@ -83,7 +83,7 @@ public class CloudController {
         currentUser.setPcloudAccount(provider.getAccount().getId());
         currentUser.setPcloudToken(provider.getAccessToken());
         userRepository.save(currentUser);
-
+        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -94,7 +94,7 @@ public class CloudController {
         currentUser.setHidriveAccount(provider.getAccount().getId());
         currentUser.setHidriveToken(provider.getAccessToken());
         userRepository.save(currentUser);
-
+        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -105,7 +105,7 @@ public class CloudController {
         currentUser.setYandexAccount(provider.getAccount().getId());
         currentUser.setYandexToken(provider.getAccessToken());
         userRepository.save(currentUser);
-
+        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -119,7 +119,7 @@ public class CloudController {
             currentUser.setGoogleAccount(provider.getAccount().getId());
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
-
+            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -137,7 +137,7 @@ public class CloudController {
             currentUser.setDropboxAccount(provider.getAccount().getId());
             currentUser.setDropboxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-
+            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -154,7 +154,7 @@ public class CloudController {
             currentUser.setOnedriveAccount(provider.getAccount().getId());
             currentUser.setOnedriveToken(provider.getAccessToken());
             userRepository.save(currentUser);
-
+            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -172,7 +172,7 @@ public class CloudController {
             currentUser.setBoxAccount(provider.getAccount().getId());
             currentUser.setBoxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-
+            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -243,6 +243,58 @@ public class CloudController {
 
         if(accountSum >= 2) {
             worker.setName(user.getUsername());
+            worker.start();
+            threads.add(worker);
+        }
+
+        logger.debug("worker starting");
+    }
+
+    @SuppressWarnings("Duplicates")
+    private void startWorkerAfter(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        for (ScannerWorker thread : threads) {
+            if (thread.getName().equals(userDetails.getUsername())) {
+                thread.setRunning(false);
+                try {
+                    thread.join();
+                    threads.remove(thread);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        ScannerWorker worker = new ScannerWorker(user);
+
+        int accountSum = 0;
+
+        if(user.getGoogleAccount() != null) {
+            accountSum++;
+        }
+        if (user.getDropboxAccount() != null) {
+            accountSum++;
+        }
+        if (user.getBoxAccount() != null) {
+            accountSum++;
+        }
+        if (user.getOnedriveAccount() != null) {
+            accountSum++;
+        }
+        if (user.getYandexAccount() != null) {
+            accountSum++;
+        }
+        if (user.getHidriveAccount() != null) {
+            accountSum++;
+        }
+        if (user.getPcloudAccount() != null) {
+            accountSum++;
+        }
+
+        if(accountSum >= 2) {
+            worker.setName(user.getUsername());
+            worker.setFirstStart(false);
             worker.start();
             threads.add(worker);
         }
