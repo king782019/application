@@ -441,7 +441,62 @@ public class ScannerWorker extends Thread {
     }
 
     @SuppressWarnings("Duplicates")
-    private void sendOrDeleteFolders(Metadata sourceFolder, String token) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+    private void deleteFolders(Metadata sourceFolder, String token) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+        int counter = 0;
+        for (WorkerAccount account : accounts) {
+            if (account.getToken().equals(token)) {
+                continue;
+            }
+            KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+            MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+            sourceList = addRootTags(sourceList);
+            sourceList = listLoop(sourceStorage, sourceList);
+
+            for (Metadata folder : sourceList.getMetadataList()) {
+                if (folder.type.equals("folder") && folder.name.equals(sourceFolder.name)) {
+                    counter++;
+                }
+            }
+        }
+
+        if (counter == 0) {
+
+        } else {
+            ArrayList<KClient> storageList = new ArrayList<>();
+            ArrayList<MetadataCounter> sourcesList = new ArrayList<>();
+            for (WorkerAccount account : accounts) {
+                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
+                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
+                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                sourceList = addRootTags(sourceList);
+                sourceList = listLoop(sourceStorage, sourceList);
+                storageList.add(sourceStorage);
+                sourcesList.add(sourceList);
+            }
+            boolean contains = false;
+            for(MetadataCounter collection : sourcesList) {
+                contains = collection.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(sourceFolder.name) && !sourceFolder.name.equals("root"));
+
+            }
+            if(!contains) {
+                for(int i = 0; i < sourcesList.size(); i++) {
+                    for(Metadata data : sourcesList.get(i).getMetadataList()) {
+                        if(data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)){
+                            storageList.get(i).delete(null, Folder.class, data.id);
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    @SuppressWarnings("Duplicates")
+    private void sendFolders(Metadata sourceFolder, String token) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
         int counter = 0;
         for (WorkerAccount account : accounts) {
             if (account.getToken().equals(token)) {
@@ -491,20 +546,7 @@ public class ScannerWorker extends Thread {
                 sourceStorage.create(null, Folder.class, fileParams);
             }
         } else {
-            for (WorkerAccount account : accounts) {
-                KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
-                Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
-                MetadataCollection source = sourceStorage.contents(null, Folder.class, "root");
-                MetadataCounter sourceList = new MetadataCounter(0, source.objects);
-                sourceList = addRootTags(sourceList);
-                sourceList = listLoop(sourceStorage, sourceList);
 
-                for (Metadata data : sourceList.getMetadataList()) {
-                    if (data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)) {
-                        sourceStorage.delete(null, Folder.class, data.id);
-                    }
-                }
-            }
 
         }
 
@@ -535,7 +577,9 @@ public class ScannerWorker extends Thread {
         for (Metadata mData : reversed) {
             if (mData.type.equals("folder")) {
                 if (!destinationList.getMetadataList().contains(mData)) {
-                    sendOrDeleteFolders(mData, sourceToken);
+
+                        sendFolders(mData, sourceToken);
+
                 }
             }
         }
@@ -686,12 +730,16 @@ public class ScannerWorker extends Thread {
         List<Metadata> reversed = new ArrayList<>(destinationList.getMetadataList());
         Collections.reverse(reversed);
 
+
+
         for (Metadata data : reversed) {
+
             if (data.type.equals("folder")) {
                 if (!sourceList.getMetadataList().contains(data)) {
-
-                    sendOrDeleteFolders(data, destinationToken);
-
+                    boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.name) && !data.name.equals("root"));
+                    if(!contains) {
+                        deleteFolders(data, destinationToken);
+                    }
                 }
             }
 
