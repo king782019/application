@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -227,7 +228,7 @@ public class CloudController {
             }
         }
         User user = userRepository.findByUsername(userDetails.getUsername());
-        ScannerWorker worker = new ScannerWorker(user);
+        ScannerWorker worker = new ScannerWorker(user, userRepository);
 
         int accountSum = 0;
 
@@ -278,7 +279,7 @@ public class CloudController {
         }
 
         User user = userRepository.findByUsername(userDetails.getUsername());
-        ScannerWorker worker = new ScannerWorker(user);
+        ScannerWorker worker = new ScannerWorker(user, userRepository);
 
         int accountSum = 0;
 
@@ -341,6 +342,16 @@ public class CloudController {
      */
     @SuppressWarnings("Duplicates")
     private MetadataCounter listLoop(KClient client, MetadataCounter list) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if(principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+        User user = userRepository.findByUsername(username);
+
         MetadataCollection temp = new MetadataCollection();
 
         int i = list.getCounter();
@@ -352,6 +363,9 @@ public class CloudController {
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
+                    if(user.getGoogleAccount().equals(temp.objects.get(i).account.toString())) {
+                        list.setGoogle(true);
+                    }
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
 

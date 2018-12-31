@@ -7,19 +7,19 @@ import java.util.List;
 public class MetadataCounter {
     private int counter;
     private List<Metadata> metadataList;
-    private boolean isHidrive = false;
+    private boolean isGoogle = false;
 
     public MetadataCounter(int counter, List<Metadata> metadataList) {
         this.counter = counter;
         this.metadataList = metadataList;
     }
 
-    public boolean getHidrive() {
-        return isHidrive;
+    public boolean isGoogle() {
+        return isGoogle;
     }
 
-    public void setHidrive(boolean hidrive) {
-        isHidrive = hidrive;
+    public void setGoogle(boolean google) {
+        isGoogle = google;
     }
 
     public int getCounter() {

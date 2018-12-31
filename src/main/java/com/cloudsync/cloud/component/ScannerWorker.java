@@ -3,6 +3,7 @@ package com.cloudsync.cloud.component;
 import com.cloudsync.cloud.model.MetadataCounter;
 import com.cloudsync.cloud.model.User;
 import com.cloudsync.cloud.model.WorkerAccount;
+import com.cloudsync.cloud.repository.UserRepository;
 import com.kloudless.KClient;
 import com.kloudless.Kloudless;
 import com.kloudless.exception.APIConnectionException;
@@ -12,9 +13,15 @@ import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.model.Folder;
 import com.kloudless.model.Metadata;
 import com.kloudless.model.MetadataCollection;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -23,14 +30,17 @@ import java.util.*;
 
 public class ScannerWorker extends Thread {
 
+    private UserRepository userRepository;
+
     private Boolean firstStart = true;
     private User user;
     private volatile boolean running = true;
     private static final Logger logger = LogManager.getLogger(ScannerWorker.class);
     private ArrayList<WorkerAccount> accounts;
 
-    public ScannerWorker(User user) {
+    public ScannerWorker(User user, UserRepository userRepository) {
         this.user = user;
+        this.userRepository = userRepository;
     }
 
     public void setRunning(boolean running) {
@@ -385,9 +395,14 @@ public class ScannerWorker extends Thread {
 
     @SuppressWarnings("Duplicates")
     private MetadataCounter addRootTags(MetadataCounter sourceList) {
+
+        String username = this.getName();
+        User user = userRepository.findByUsername(username);
         Integer num = null;
         for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-
+            if(user.getGoogleAccount().equals(sourceList.getMetadataList().get(i).account.toString())) {
+                sourceList.setGoogle(true);
+            }
             sourceList.getMetadataList().get(i).parent.Id = "root";
             sourceList.getMetadataList().get(i).parent.name = "root";
             String noWhitespace = sourceList.getMetadataList().get(i).name.replaceAll("\\s", "");
@@ -409,6 +424,11 @@ public class ScannerWorker extends Thread {
 
     @SuppressWarnings("Duplicates")
     private MetadataCounter listLoop(KClient client, MetadataCounter list) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
+
+
+        String username = this.getName();
+        User user = userRepository.findByUsername(username);
+
         MetadataCollection temp = new MetadataCollection();
 
         int i = list.getCounter();
@@ -417,8 +437,12 @@ public class ScannerWorker extends Thread {
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
+                    if(user.getGoogleAccount().equals(temp.objects.get(j).account.toString())) {
+                        list.setGoogle(true);
+                    }
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
-                    temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
+                    String noWhitespaceFolder = temp.objects.get(j).parent.name.replaceAll("\\s", "");
+                    temp.objects.get(j).parent.name = noWhitespaceFolder.replaceAll("\\(.*\\)", "");
                     String noWhitespace = temp.objects.get(j).name.replaceAll("\\s", "");
                     temp.objects.get(j).mime_type = noWhitespace.replaceAll("\\(.*\\)", "");
                 }
@@ -484,7 +508,7 @@ public class ScannerWorker extends Thread {
             if(!contains) {
                 for(int i = 0; i < sourcesList.size(); i++) {
                     for(Metadata data : sourcesList.get(i).getMetadataList()) {
-                        if(data.type.equals("folder") && data.name.equals(sourceFolder.name) && data.parent.name.equals(sourceFolder.parent.name)){
+                        if(data.type.equals("folder") && data.mime_type.equals(sourceFolder.mime_type) && data.parent.name.equals(sourceFolder.parent.name)){
                             storageList.get(i).delete(null, Folder.class, data.id);
                         }
                     }
@@ -539,7 +563,21 @@ public class ScannerWorker extends Thread {
                     }
                 }
 
-                fileParams.put("name", sourceFolder.name);
+                if(sourceList.isGoogle()) {
+                    StringBuilder name = new StringBuilder(sourceFolder.name);
+                    if(sourceFolder.name.contains(".")){
+                        int index = sourceFolder.name.indexOf(".");
+
+                        name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                    } else {
+                        name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+
+                    }
+                    fileParams.put("name", name);
+                } else {
+                    String name = sourceFolder.name.replaceAll("\\(.*\\)", "");
+                    fileParams.put("name", name);
+                }
                 if (fileParams.size() <= 1) {
                     if(sourceFolder.parent.name.equals("root")) {
                         fileParams.put("parent_id", "root");
@@ -609,8 +647,22 @@ public class ScannerWorker extends Thread {
                             }
                         }
 
+                        if(destinationList.isGoogle()) {
+                            StringBuilder name = new StringBuilder(mData.name);
+                            if(mData.name.contains(".")){
+                                int index = mData.name.indexOf(".");
 
-                        fileParams.put("name", mData.name);
+                                name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                            } else {
+                                name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+
+                            }
+                            fileParams.put("name", name);
+                        } else {
+                            String name = mData.name.replaceAll("\\(.*\\)", "");
+                            fileParams.put("name", name);
+                        }
+
                         if (fileParams.size() <= 1) {
                             if(!mData.parent.name.equals("root")) break;
                             fileParams.put("parent_id", "root");
@@ -689,8 +741,10 @@ public class ScannerWorker extends Thread {
 
                                 Instant instant1 = Instant.parse(file.modified);
                                 Instant instant2 = Instant.parse(data.modified);
+                                Instant now = Instant.now();
+                                now.minusSeconds(60);
 
-                                if (instant1.isAfter(instant2)) {
+                                if (instant1.isAfter(instant2) && now.isAfter(instant1)) {
                                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                                     HashMap<String, Object> fileParams = new HashMap<>();
                                     for (Metadata Fdata : destinationList.getMetadataList()) {
@@ -703,8 +757,21 @@ public class ScannerWorker extends Thread {
                                         }
                                     }
 
+                                    if(destinationList.isGoogle()) {
+                                        StringBuilder name = new StringBuilder(file.name);
+                                        if(file.name.contains(".")){
+                                            int index = file.name.indexOf(".");
 
-                                    fileParams.put("name", file.name);
+                                            name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                                        } else {
+                                            name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+
+                                        }
+                                        fileParams.put("name", name);
+                                    } else {
+                                        String name = file.name.replaceAll("\\(.*\\)", "");
+                                        fileParams.put("name", name);
+                                    }
                                     if (fileParams.size() <= 1) {
                                         fileParams.put("parent_id", "root");
 
