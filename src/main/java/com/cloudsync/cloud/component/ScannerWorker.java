@@ -619,9 +619,7 @@ public class ScannerWorker extends Thread {
         for (Metadata mData : reversed) {
             if (mData.type.equals("folder")) {
                 if (!destinationList.getMetadataList().contains(mData)) {
-
-                        sendFolders(mData, sourceToken);
-
+                    sendFolders(mData, sourceToken);
                 }
             }
         }
