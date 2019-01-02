@@ -408,7 +408,7 @@ public class ScannerWorker extends Thread {
             sourceList.getMetadataList().get(i).parent.Id = "root";
             sourceList.getMetadataList().get(i).parent.name = "root";
             String noWhitespace = sourceList.getMetadataList().get(i).name.replaceAll("\\s", "");
-            sourceList.getMetadataList().get(i).mime_type = noWhitespace.replaceAll("\\(.*\\)", "");
+            sourceList.getMetadataList().get(i).mime_type = noWhitespace.replaceAll("\\(.*\\)", "").toUpperCase();
             if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
                 num = i;
             }
@@ -446,9 +446,9 @@ public class ScannerWorker extends Thread {
                     }
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     String noWhitespaceFolder = temp.objects.get(j).parent.name.replaceAll("\\s", "");
-                    temp.objects.get(j).parent.name = noWhitespaceFolder.replaceAll("\\(.*\\)", "");
+                    temp.objects.get(j).parent.name = noWhitespaceFolder.replaceAll("\\(.*\\)", "").toUpperCase();
                     String noWhitespace = temp.objects.get(j).name.replaceAll("\\s", "");
-                    temp.objects.get(j).mime_type = noWhitespace.replaceAll("\\(.*\\)", "");
+                    temp.objects.get(j).mime_type = noWhitespace.replaceAll("\\(.*\\)", "").toUpperCase();
                 }
                 break;
             }
@@ -506,7 +506,7 @@ public class ScannerWorker extends Thread {
             }
             boolean contains = false;
             for(MetadataCounter collection : sourcesList) {
-                contains = collection.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(sourceFolder.name) && !sourceFolder.name.equals("root"));
+                contains = collection.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(sourceFolder.mime_type) && !sourceFolder.name.equals("root"));
 
             }
             if(!contains) {
