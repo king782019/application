@@ -186,6 +186,7 @@ public class CloudController {
     @RequestMapping(value = "/status", method = RequestMethod.POST)
     @ResponseBody
     private String checkStatus(Authentication auth) {
+        logger.info("User is checking status");
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         for(ScannerWorker thread : threads) {
             if(thread.getName().equals(userDetails.getUsername())) {
@@ -213,7 +214,7 @@ public class CloudController {
             }
         }
 
-        logger.debug("worker stopped");
+        logger.info("User requested to stop worker");
 
     }
 
@@ -260,7 +261,7 @@ public class CloudController {
             threads.add(worker);
         }
 
-        logger.debug("worker starting");
+        logger.info("User requested to start worker");
     }
 
     @SuppressWarnings("Duplicates")
@@ -312,7 +313,7 @@ public class CloudController {
             threads.add(worker);
         }
 
-        logger.debug("worker starting");
+        logger.info("User requested to start worker after adding new account");
     }
 
     @RequestMapping(value = "/remove", method = RequestMethod.POST)
@@ -325,6 +326,7 @@ public class CloudController {
         newUser.setPassword(user.getPassword());
         newUser.setUsername(user.getUsername());
         userRepository.save(newUser);
+        logger.info("User requested to remove all accounts");
     }
 
 

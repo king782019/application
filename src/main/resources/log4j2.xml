@@ -6,7 +6,7 @@
       <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
     </Console>
     <!-- File Appender -->
-    <File name="File" fileName="C:/Users/gazer/Documents/eclipse-workspace/cloud/logs/file.log">
+    <File name="File" fileName="./target/test-classes/file.log">
       <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
     </File>
     
