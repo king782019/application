@@ -671,6 +671,11 @@ public class ScannerWorker extends Thread {
                         }
                         fileParams.put("account", destinationAccount);
                         com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         logger.debug("File {} has been copied with params: {}", mData.name, fileParams);
                     }
                 }
@@ -780,6 +785,11 @@ public class ScannerWorker extends Thread {
                                     }
                                     fileParams.put("account", destinationAccount);
                                     com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                     logger.debug(String.format("File %s has been recopied ", file.name));
                                 }
 
