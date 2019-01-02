@@ -483,7 +483,7 @@ public class ScannerWorker extends Thread {
             sourceList = listLoop(sourceStorage, sourceList);
 
             for (Metadata folder : sourceList.getMetadataList()) {
-                if (folder.type.equals("folder") && folder.name.equals(sourceFolder.name)) {
+                if (folder.type.equals("folder") && folder.mime_type.equals(sourceFolder.mime_type) && folder.parent.name.equals(sourceFolder.parent.name)) {
                     counter++;
                 }
             }
@@ -538,7 +538,7 @@ public class ScannerWorker extends Thread {
             sourceList = listLoop(sourceStorage, sourceList);
 
             for (Metadata folder : sourceList.getMetadataList()) {
-                if (folder.type.equals("folder") && folder.name.equals(sourceFolder.name)) {
+                if (folder.type.equals("folder") && folder.mime_type.equals(sourceFolder.mime_type) && folder.parent.name.equals(sourceFolder.parent.name)) {
                     counter++;
                 }
             }
@@ -781,7 +781,6 @@ public class ScannerWorker extends Thread {
                                     }
                                     if (fileParams.size() <= 1) {
                                         fileParams.put("parent_id", "root");
-
                                     }
                                     fileParams.put("account", destinationAccount);
                                     com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
