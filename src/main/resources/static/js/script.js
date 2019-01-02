@@ -53,7 +53,7 @@ $(document).ready(function () {
             url: '/status',
             type: 'POST',
             success: function(res) {
-                toastr.success(res.toString())
+                toastr.info(res.toString())
             }
         })
     })
