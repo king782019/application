@@ -400,8 +400,10 @@ public class ScannerWorker extends Thread {
         User user = userRepository.findByUsername(username);
         Integer num = null;
         for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-            if(user.getGoogleAccount().equals(sourceList.getMetadataList().get(i).account.toString())) {
-                sourceList.setGoogle(true);
+            if(user.getGoogleAccount() != null) {
+                if (user.getGoogleAccount().equals(sourceList.getMetadataList().get(i).account.toString())) {
+                    sourceList.setGoogle(true);
+                }
             }
             sourceList.getMetadataList().get(i).parent.Id = "root";
             sourceList.getMetadataList().get(i).parent.name = "root";
@@ -437,8 +439,10 @@ public class ScannerWorker extends Thread {
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
-                    if(user.getGoogleAccount().equals(temp.objects.get(j).account.toString())) {
-                        list.setGoogle(true);
+                    if(user.getGoogleAccount() != null) {
+                        if (user.getGoogleAccount().equals(temp.objects.get(j).account.toString())) {
+                            list.setGoogle(true);
+                        }
                     }
                     temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
                     String noWhitespaceFolder = temp.objects.get(j).parent.name.replaceAll("\\s", "");
