@@ -19,7 +19,7 @@ $(document).ready(function () {
             type: 'POST',
             contentType: 'application/json',
             success: function() {
-                $(".status").text("Accounts removed");
+                toastr.success("Accounts removed!");
             }
 
         })
@@ -31,7 +31,7 @@ $(document).ready(function () {
             type: 'POST',
             contentType: 'application/json',
             success: function() {
-                $(".status").text("Successful start");
+                toastr.success("Successful start!");
             }
         })
     });
@@ -43,7 +43,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             success: function() {
                 console.log("successful stop");
-                $(".status").text("Successful stop");
+                toastr.success("Worker will stop soon!");
             }
         })
     });
@@ -53,7 +53,7 @@ $(document).ready(function () {
             url: '/status',
             type: 'POST',
             success: function(res) {
-                $(".status").text(res.toString())
+                toastr.success(res.toString())
             }
         })
     })
@@ -75,7 +75,7 @@ $(document).ready(function () {
                         dataType: 'json',
                         success: function (data) {
 
-                            $(".sync").text("Added");
+                            toastr.success("Google drive was added!");
 
                         },
                     });
@@ -89,7 +89,7 @@ $(document).ready(function () {
                         dataType: 'json',
                         success: function (data) {
 
-                            $(".sync").text("Added");
+                            toastr.success("DropBox was added!");
                         },
                     });
                     break;
@@ -101,8 +101,7 @@ $(document).ready(function () {
                         data: JSON.stringify(res),
                         dataType: 'json',
                         success: function (data) {
-
-                            $(".sync").text("Added");
+                            toastr.success("OneDrive was added!");
                         },
                     });
                     break;
@@ -114,8 +113,7 @@ $(document).ready(function () {
                         data: JSON.stringify(res),
                         dataType: 'json',
                         success: function (data) {
-
-                            $(".sync").text("Added");
+                            toastr.success("Box was added!");
                         },
                     });
                     break;
@@ -127,11 +125,12 @@ $(document).ready(function () {
                         data: JSON.stringify(res),
                         dataType: 'json',
                         success: function (data) {
-                            $(".sunc").text("Added");
+                            toastr.success("WebDAV account was added!");
                         }
                     })
+                    break;
                 default:
-                    $(".sync").text("Error provider not found!");
+                    toastr.error("Provider not found!");
                     break;
             }
 
