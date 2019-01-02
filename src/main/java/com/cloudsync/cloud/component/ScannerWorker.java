@@ -325,7 +325,7 @@ public class ScannerWorker extends Thread {
                         HashMap<String, Object> fileParams = new HashMap<>();
                         for (Metadata data : sourceList.getMetadataList()) {
                             if (data.type.equals("folder")) {
-                                if (data.name.equals(metadata.parent.name)) {
+                                if (data.mime_type.equals(metadata.parent.name)) {
                                     fileParams.put("parent_id", data.id);
                                     break;
                                 }
@@ -559,7 +559,7 @@ public class ScannerWorker extends Thread {
                 HashMap<String, Object> fileParams = new HashMap<>();
                 for (Metadata data : sourceList.getMetadataList()) {
                     if (data.type.equals("folder")) {
-                        if (data.name.equals(sourceFolder.parent.name)) {
+                        if (data.mime_type.equals(sourceFolder.parent.name)) {
                             fileParams.put("parent_id", data.id);
                             break;
                         }
@@ -641,7 +641,7 @@ public class ScannerWorker extends Thread {
                         HashMap<String, Object> fileParams = new HashMap<>();
                         for (Metadata data : destinationList.getMetadataList()) {
                             if (data.type.equals("folder")) {
-                                if (data.name.equals(mData.parent.name)) {
+                                if (data.mime_type.equals(mData.parent.name)) {
                                     fileParams.put("parent_id", data.id);
                                     break;
                                 }
