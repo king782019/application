@@ -785,7 +785,7 @@ public class ScannerWorker extends Thread {
                         fileParams.put("account", destinationAccount);
                         com.kloudless.model.File.copy(mData.id, sourceAccount, fileParams);
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(3000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -820,6 +820,12 @@ public class ScannerWorker extends Thread {
         List<Metadata> forRemove = new ArrayList<>();
         for (Metadata data : destinationList.getMetadataList()) {
             if (data.type.equals("file")) {
+
+                boolean isNameHasDigit = data.name.matches(".*\\d+.*");
+                if(isNameHasDigit) {
+                    destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                }
+
                 boolean contains = sourceList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(data.mime_type) && x.parent.name.equals(data.parent.name));
                 if (!contains) {
 
