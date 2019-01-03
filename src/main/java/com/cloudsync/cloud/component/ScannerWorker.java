@@ -152,6 +152,119 @@ public class ScannerWorker extends Thread {
                     }
                 }
 
+                for (WorkerAccount account : accounts) {
+                    for (WorkerAccount innerAccount : accounts) {
+                        if (!account.equals(innerAccount)) {
+
+                            String sourceAccount = account.getAccount();
+                            String sourceToken = account.getToken();
+                            String destinationToken = innerAccount.getToken();
+                            String destinationAccount = innerAccount.getAccount();
+                            KClient sourceStorage = new KClient(sourceToken, sourceAccount, null);
+                            KClient destinationStorage = new KClient(destinationToken, destinationAccount, null);
+
+                            Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
+
+                            MetadataCollection source = null;
+                            try {
+                                source = sourceStorage.contents(null, Folder.class, "root");
+                            } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                            MetadataCollection destination = null;
+                            try {
+                                destination = destinationStorage.contents(null, Folder.class, "root");
+                            } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                            MetadataCounter sourceList = new MetadataCounter(0, source.objects);
+                            MetadataCounter destinationList = new MetadataCounter(0, destination.objects);
+                            sourceList = addRootTags(sourceList);
+                            destinationList = addRootTags(destinationList);
+                            try {
+                                sourceList = listLoop(sourceStorage, sourceList);
+                            } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                destinationList = listLoop(destinationStorage, destinationList);
+                            } catch (APIException | UnsupportedEncodingException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                e.printStackTrace();
+                            }
+                            for (Metadata file : sourceList.getMetadataList()) {
+                                if (file.type.equals("file")) {
+                                    for (Metadata data : destinationList.getMetadataList()) {
+                                        if (data.type.equals("file")) {
+                                            if (file.parent.name.equals(data.parent.name) && file.mime_type.equals(data.mime_type) && !file.size.equals(data.size)) {
+
+                                                Instant instant1 = Instant.parse(file.modified);
+                                                Instant instant2 = Instant.parse(data.modified);
+
+                                                if (instant1.isBefore(instant2)) {
+                                                    try {
+                                                        destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
+                                                    } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException | UnsupportedEncodingException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    HashMap<String, Object> fileParams = new HashMap<>();
+                                                    for (Metadata Fdata : destinationList.getMetadataList()) {
+                                                        if (Fdata.type.equals("folder")) {
+                                                            if (Fdata.name.equals(file.parent.name)) {
+                                                                fileParams.put("parent_id", Fdata.id);
+                                                                break;
+                                                            }
+
+                                                        }
+                                                    }
+
+                                                    if (destinationList.isGoogle()) {
+                                                        StringBuilder name = new StringBuilder(file.name);
+                                                        if (file.name.contains(".")) {
+                                                            int index = file.name.indexOf(".");
+
+                                                            name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                                                        } else {
+                                                            name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+
+                                                        }
+                                                        fileParams.put("name", name);
+                                                    } else {
+                                                        String name = file.name.replaceAll("\\(.*\\)", "");
+                                                        fileParams.put("name", name);
+                                                    }
+                                                    if (fileParams.size() <= 1) {
+                                                        fileParams.put("parent_id", "root");
+                                                    }
+                                                    fileParams.put("account", destinationAccount);
+                                                    try {
+                                                        com.kloudless.model.File.copy(file.id, sourceAccount, fileParams);
+                                                    } catch (APIException | AuthenticationException | InvalidRequestException | APIConnectionException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    logger.debug(String.format("File %s has been recopied ", file.name));
+                                                }
+
+
+                                                for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
+                                                    if (destinationList.getMetadataList().get(i).mime_type.equals(data.mime_type) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
+                                                        destinationList.getMetadataList().get(i).modified = file.modified;
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
                 firstStart = false;
             }
 
@@ -192,6 +305,7 @@ public class ScannerWorker extends Thread {
                     }
                 }
             }
+
         }
 
         logger.debug("Worker exiting now");
@@ -400,7 +514,7 @@ public class ScannerWorker extends Thread {
         User user = userRepository.findByUsername(username);
         Integer num = null;
         for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
-            if(user.getGoogleAccount() != null) {
+            if (user.getGoogleAccount() != null) {
                 if (user.getGoogleAccount().equals(sourceList.getMetadataList().get(i).account.toString())) {
                     sourceList.setGoogle(true);
                 }
@@ -439,7 +553,7 @@ public class ScannerWorker extends Thread {
                 temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
                 logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
                 for (int j = 0; j < temp.objects.size(); j++) {
-                    if(user.getGoogleAccount() != null) {
+                    if (user.getGoogleAccount() != null) {
                         if (user.getGoogleAccount().equals(temp.objects.get(j).account.toString())) {
                             list.setGoogle(true);
                         }
@@ -505,14 +619,14 @@ public class ScannerWorker extends Thread {
                 sourcesList.add(sourceList);
             }
             boolean contains = false;
-            for(MetadataCounter collection : sourcesList) {
+            for (MetadataCounter collection : sourcesList) {
                 contains = collection.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(sourceFolder.mime_type) && !sourceFolder.name.equals("root"));
 
             }
-            if(!contains) {
-                for(int i = 0; i < sourcesList.size(); i++) {
-                    for(Metadata data : sourcesList.get(i).getMetadataList()) {
-                        if(data.type.equals("folder") && data.mime_type.equals(sourceFolder.mime_type) && data.parent.name.equals(sourceFolder.parent.name)){
+            if (!contains) {
+                for (int i = 0; i < sourcesList.size(); i++) {
+                    for (Metadata data : sourcesList.get(i).getMetadataList()) {
+                        if (data.type.equals("folder") && data.mime_type.equals(sourceFolder.mime_type) && data.parent.name.equals(sourceFolder.parent.name)) {
                             storageList.get(i).delete(null, Folder.class, data.id);
                         }
                     }
@@ -567,9 +681,9 @@ public class ScannerWorker extends Thread {
                     }
                 }
 
-                if(sourceList.isGoogle()) {
+                if (sourceList.isGoogle()) {
                     StringBuilder name = new StringBuilder(sourceFolder.name);
-                    if(sourceFolder.name.contains(".")){
+                    if (sourceFolder.name.contains(".")) {
                         int index = sourceFolder.name.indexOf(".");
 
                         name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
@@ -583,7 +697,7 @@ public class ScannerWorker extends Thread {
                     fileParams.put("name", name);
                 }
                 if (fileParams.size() <= 1) {
-                    if(sourceFolder.parent.name.equals("root")) {
+                    if (sourceFolder.parent.name.equals("root")) {
                         fileParams.put("parent_id", "root");
                     } else {
                         continue;
@@ -629,7 +743,6 @@ public class ScannerWorker extends Thread {
         }
 
 
-
         for (Metadata mData : sourceList.getMetadataList()) {
             if (mData.type.equals("file")) {
                 boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(mData.mime_type) && x.parent.name.equals(mData.parent.name));
@@ -649,9 +762,9 @@ public class ScannerWorker extends Thread {
                             }
                         }
 
-                        if(destinationList.isGoogle()) {
+                        if (destinationList.isGoogle()) {
                             StringBuilder name = new StringBuilder(mData.name);
-                            if(mData.name.contains(".")){
+                            if (mData.name.contains(".")) {
                                 int index = mData.name.indexOf(".");
 
                                 name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
@@ -666,7 +779,7 @@ public class ScannerWorker extends Thread {
                         }
 
                         if (fileParams.size() <= 1) {
-                            if(!mData.parent.name.equals("root")) break;
+                            if (!mData.parent.name.equals("root")) break;
                             fileParams.put("parent_id", "root");
                         }
                         fileParams.put("account", destinationAccount);
@@ -764,9 +877,9 @@ public class ScannerWorker extends Thread {
                                         }
                                     }
 
-                                    if(destinationList.isGoogle()) {
+                                    if (destinationList.isGoogle()) {
                                         StringBuilder name = new StringBuilder(file.name);
-                                        if(file.name.contains(".")){
+                                        if (file.name.contains(".")) {
                                             int index = file.name.indexOf(".");
 
                                             name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
@@ -792,6 +905,7 @@ public class ScannerWorker extends Thread {
                                     logger.debug(String.format("File %s has been recopied ", file.name));
                                 }
 
+
                                 for (int i = 0; i < destinationList.getMetadataList().size(); i++) {
                                     if (destinationList.getMetadataList().get(i).mime_type.equals(data.mime_type) && destinationList.getMetadataList().get(i).type.equals(data.type)) {
                                         destinationList.getMetadataList().get(i).modified = file.modified;
@@ -799,6 +913,7 @@ public class ScannerWorker extends Thread {
                                 }
 
                             }
+
                         }
                     }
                 }
@@ -813,13 +928,12 @@ public class ScannerWorker extends Thread {
         Collections.reverse(reversed);
 
 
-
         for (Metadata data : reversed) {
 
             if (data.type.equals("folder")) {
                 if (!sourceList.getMetadataList().contains(data)) {
                     boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.name) && !data.name.equals("root"));
-                    if(!contains) {
+                    if (!contains) {
                         deleteFolders(data, destinationToken);
                     }
                 }
