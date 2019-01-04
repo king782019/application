@@ -353,8 +353,8 @@ public class ScannerWorker extends Thread {
                     MetadataCounter destinationList;
                     for (int i = 0; i < contentsOfAccounts.size(); i++) {
                         destinationList = contentsOfAccounts.get(i);
-                        boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(metadata.mime_type) && x.type.equals(metadata.type));
-                        if (!exists && !destinationList.getMetadataList().contains(metadata)) {
+                        boolean exists = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(metadata.mime_type) && x.type.equals(metadata.type) && x.parent.name.equals(metadata.parent.name));
+                        if (!exists) {
                             HashMap<String, Object> fileParams = new HashMap<>();
                             for (Metadata data : destinationList.getMetadataList()) {
                                 if (data.type.equals("folder")) {
@@ -367,11 +367,27 @@ public class ScannerWorker extends Thread {
                             }
 
 
-                            fileParams.put("name", metadata.name);
-                            if (fileParams.size() <= 1) {
-                                fileParams.put("parent_id", "root");
+                            if (destinationList.isGoogle()) {
+                                StringBuilder name = new StringBuilder(metadata.name);
+                                if (metadata.name.contains(".")) {
+                                    int index = metadata.name.indexOf(".");
 
+                                    name.insert(index, "(" + RandomStringUtils.random(4, true, false) + ")");
+                                } else {
+                                    name.append("(" + RandomStringUtils.random(4, true, false) + ")");
+
+                                }
+                                fileParams.put("name", name);
+                            } else {
+                                String name = metadata.name.replaceAll("\\(.*\\)", "");
+                                fileParams.put("name", name);
                             }
+
+                            if (fileParams.size() <= 1) {
+                                if (!metadata.parent.name.equals("root")) break;
+                                fileParams.put("parent_id", "root");
+                            }
+
                             fileParams.put("account", accountsAccs.get(i));
                             for (WorkerAccount account : accounts) {
                                 try {
@@ -446,9 +462,24 @@ public class ScannerWorker extends Thread {
 
                             }
                         }
+                        if (sourceList.isGoogle()) {
+                            StringBuilder name = new StringBuilder(metadata.name);
+                            if (metadata.name.contains(".")) {
+                                int index = metadata.name.indexOf(".");
 
-                        fileParams.put("name", metadata.name);
+                                name.insert(index, "(" + RandomStringUtils.random(4, true, false) + ")");
+                            } else {
+                                name.append("(" + RandomStringUtils.random(4, true, false) + ")");
+
+                            }
+                            fileParams.put("name", name);
+                        } else {
+                            String name = metadata.name.replaceAll("\\(.*\\)", "");
+                            fileParams.put("name", name);
+                        }
+
                         if (fileParams.size() <= 1) {
+                            if (!metadata.parent.name.equals("root")) break;
                             fileParams.put("parent_id", "root");
                         }
                         try {
@@ -736,7 +767,8 @@ public class ScannerWorker extends Thread {
 
         for (Metadata mData : reversed) {
             if (mData.type.equals("folder")) {
-                if (!destinationList.getMetadataList().contains(mData)) {
+                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(mData.mime_type) && x.parent.name.equals(mData.parent.name));
+                if (!contains) {
                     sendFolders(mData, sourceToken);
                 }
             }
@@ -822,12 +854,12 @@ public class ScannerWorker extends Thread {
             if (data.type.equals("file")) {
 
                 boolean isNameHasDigit = data.name.matches(".*\\d+.*");
-                if(isNameHasDigit) {
+                if (isNameHasDigit) {
                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                     continue;
                 }
                 long containsSame = destinationList.getMetadataList().stream().filter(x -> data.mime_type.equals(x.mime_type)).count();
-                if(containsSame >= 2) {
+                if (containsSame >= 2) {
                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                     continue;
                 }
@@ -943,11 +975,10 @@ public class ScannerWorker extends Thread {
         for (Metadata data : reversed) {
 
             if (data.type.equals("folder")) {
-                if (!sourceList.getMetadataList().contains(data)) {
-                    boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.name) && !data.name.equals("root"));
-                    if (!contains) {
-                        deleteFolders(data, destinationToken);
-                    }
+
+                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.mime_type) && !data.name.equals("root"));
+                if (!contains) {
+                    deleteFolders(data, destinationToken);
                 }
             }
 
