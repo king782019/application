@@ -222,9 +222,9 @@ public class ScannerWorker extends Thread {
                                                         if (file.name.contains(".")) {
                                                             int index = file.name.indexOf(".");
 
-                                                            name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                                                            name.insert(index, "(" + RandomStringUtils.random(4, true, false) + ")");
                                                         } else {
-                                                            name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+                                                            name.append("(" + RandomStringUtils.random(4, true, false) + ")");
 
                                                         }
                                                         fileParams.put("name", name);
@@ -686,9 +686,9 @@ public class ScannerWorker extends Thread {
                     if (sourceFolder.name.contains(".")) {
                         int index = sourceFolder.name.indexOf(".");
 
-                        name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                        name.insert(index, "(" + RandomStringUtils.random(4, true, false) + ")");
                     } else {
-                        name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+                        name.append("(" + RandomStringUtils.random(4, true, false) + ")");
 
                     }
                     fileParams.put("name", name);
@@ -888,9 +888,9 @@ public class ScannerWorker extends Thread {
                                         if (file.name.contains(".")) {
                                             int index = file.name.indexOf(".");
 
-                                            name.insert(index, "(" + RandomStringUtils.random(3, true, true) + ")");
+                                            name.insert(index, "(" + RandomStringUtils.random(4, true, false) + ")");
                                         } else {
-                                            name.append("(" + RandomStringUtils.random(3, true, true) + ")");
+                                            name.append("(" + RandomStringUtils.random(4, true, false) + ")");
 
                                         }
                                         fileParams.put("name", name);
