@@ -209,7 +209,7 @@ public class ScannerWorker extends Thread {
                                                     HashMap<String, Object> fileParams = new HashMap<>();
                                                     for (Metadata Fdata : destinationList.getMetadataList()) {
                                                         if (Fdata.type.equals("folder")) {
-                                                            if (Fdata.name.equals(file.parent.name)) {
+                                                            if (Fdata.mime_type.equals(file.parent.name)) {
                                                                 fileParams.put("parent_id", Fdata.id);
                                                                 break;
                                                             }
@@ -358,7 +358,7 @@ public class ScannerWorker extends Thread {
                             HashMap<String, Object> fileParams = new HashMap<>();
                             for (Metadata data : destinationList.getMetadataList()) {
                                 if (data.type.equals("folder")) {
-                                    if (data.name.equals(metadata.parent.name)) {
+                                    if (data.mime_type.equals(metadata.parent.name)) {
                                         fileParams.put("parent_id", data.id);
                                         break;
                                     }
@@ -913,7 +913,7 @@ public class ScannerWorker extends Thread {
                                     HashMap<String, Object> fileParams = new HashMap<>();
                                     for (Metadata Fdata : destinationList.getMetadataList()) {
                                         if (Fdata.type.equals("folder")) {
-                                            if (Fdata.name.equals(file.parent.name)) {
+                                            if (Fdata.mime_type.equals(file.parent.name)) {
                                                 fileParams.put("parent_id", Fdata.id);
                                                 break;
                                             }
