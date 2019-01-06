@@ -33,10 +33,19 @@ public class ScannerWorker extends Thread {
     private UserRepository userRepository;
 
     private Boolean firstStart = true;
+    private boolean sync = false;
     private User user;
     private volatile boolean running = true;
     private static final Logger logger = LogManager.getLogger(ScannerWorker.class);
     private ArrayList<WorkerAccount> accounts;
+
+    public boolean isSync() {
+        return sync;
+    }
+
+    public void setSync(boolean sync) {
+        this.sync = sync;
+    }
 
     public ScannerWorker(User user, UserRepository userRepository) {
         this.user = user;
@@ -96,6 +105,29 @@ public class ScannerWorker extends Thread {
             if (user.getPcloudAccount() != null) {
                 WorkerAccount provider = new WorkerAccount(user.getPcloudAccount(), user.getPcloudToken());
                 accounts.add(provider);
+            }
+
+            if(sync) {
+                long end = System.currentTimeMillis() + 300000; // 5 min
+                while(System.currentTimeMillis() <= end) {
+                    for (WorkerAccount account : accounts) {
+                        for (WorkerAccount innerAccount : accounts) {
+
+                            if (!account.equals(innerAccount)) {
+                                String sourceAccount = account.getAccount();
+                                String sourceToken = account.getToken();
+                                String destinationToken = innerAccount.getToken();
+                                String destinationAccount = innerAccount.getAccount();
+                                try {
+                                    requestAdd(sourceAccount, sourceToken, destinationAccount, destinationToken);
+                                } catch (APIException | AuthenticationException | APIConnectionException | InvalidRequestException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+                sync = false;
             }
 
             if (firstStart) {
@@ -735,6 +767,7 @@ public class ScannerWorker extends Thread {
                     }
                 }
                 sourceStorage.create(null, Folder.class, fileParams);
+                logger.debug("Folder {} created in {}", fileParams.get("name"), account.getAccount());
             }
         } else {
 
@@ -782,7 +815,7 @@ public class ScannerWorker extends Thread {
                     Instant now = Instant.now();
                     Instant modified = Instant.parse(mData.modified);
                     modified = modified.plusSeconds(300);
-                    if (modified.isAfter(now)) {
+                    if (modified.isAfter(now) || sync) {
                         HashMap<String, Object> fileParams = new HashMap<>();
                         for (Metadata data : destinationList.getMetadataList()) {
                             if (data.type.equals("folder")) {

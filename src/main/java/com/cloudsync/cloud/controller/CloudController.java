@@ -84,7 +84,6 @@ public class CloudController {
         currentUser.setPcloudAccount(provider.getAccount().getId());
         currentUser.setPcloudToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -95,7 +94,6 @@ public class CloudController {
         currentUser.setHidriveAccount(provider.getAccount().getId());
         currentUser.setHidriveToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -106,7 +104,6 @@ public class CloudController {
         currentUser.setYandexAccount(provider.getAccount().getId());
         currentUser.setYandexToken(provider.getAccessToken());
         userRepository.save(currentUser);
-        startWorkerAfter(auth);
         return "OK";
     }
 
@@ -120,7 +117,6 @@ public class CloudController {
             currentUser.setGoogleAccount(provider.getAccount().getId());
             currentUser.setGoogleToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -138,7 +134,6 @@ public class CloudController {
             currentUser.setDropboxAccount(provider.getAccount().getId());
             currentUser.setDropboxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -155,7 +150,6 @@ public class CloudController {
             currentUser.setOnedriveAccount(provider.getAccount().getId());
             currentUser.setOnedriveToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -173,7 +167,6 @@ public class CloudController {
             currentUser.setBoxAccount(provider.getAccount().getId());
             currentUser.setBoxToken(provider.getAccessToken());
             userRepository.save(currentUser);
-            startWorkerAfter(auth);
         } catch (UsernameNotFoundException err) {
             err.printStackTrace();
             return null;
@@ -335,6 +328,8 @@ public class CloudController {
     }
 
     @SuppressWarnings("Duplicates")
+    @RequestMapping(value = "/sync", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.OK)
     private void startWorkerAfter(Authentication auth) {
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         for (ScannerWorker thread : threads) {
@@ -376,9 +371,10 @@ public class CloudController {
             accountSum++;
         }
 
-        if(accountSum >= 2) {
+        if(accountSum > 2) {
             worker.setName(user.getUsername());
             worker.setFirstStart(false);
+            worker.setSync(true);
             worker.start();
             threads.add(worker);
         }

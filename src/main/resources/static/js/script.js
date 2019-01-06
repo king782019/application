@@ -102,6 +102,17 @@ $(document).ready(function () {
         })
     });
 
+    $("#sync").click(function() {
+        $.ajax({
+            url: '/sync',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function() {
+                toastr.info("Synchronizing have started!");
+            }
+        })
+    })
+
     $("#startWorker").click(function () {
         $.ajax({
             url: '/start',
