@@ -1009,9 +1009,12 @@ public class ScannerWorker extends Thread {
 
             if (data.type.equals("folder")) {
 
-                boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.mime_type) && !data.name.equals("root"));
-                if (!contains) {
-                    deleteFolders(data, destinationToken);
+                boolean exists = sourceList.getMetadataList().stream().anyMatch(x-> x.parent.name.equals(data.parent.name) && x.mime_type.equals(data.mime_type));
+                if(!exists) {
+                    boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(data.mime_type) && !data.name.equals("root"));
+                    if (!contains) {
+                        deleteFolders(data, destinationToken);
+                    }
                 }
             }
 
