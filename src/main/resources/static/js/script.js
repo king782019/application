@@ -23,7 +23,84 @@ $(document).ready(function () {
             }
 
         })
-    })
+    });
+
+    $("#removeGoogle").click(function () {
+       $.ajax({
+           url: '/removeGoogle',
+           type: 'POST',
+           contentType: "application/json",
+           success: function() {
+               location.reload();
+           }
+       })
+    });
+
+    $("#removeDropbox").click(function () {
+        $.ajax({
+            url: '/removeDropbox',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
+
+    $("#removeBox").click(function () {
+        $.ajax({
+            url: '/removeBox',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
+
+    $("#removeOnedrive").click(function () {
+        $.ajax({
+            url: '/removeOnedrive',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
+
+    $("#removeYandex").click(function () {
+        $.ajax({
+            url: '/removeYandex',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
+
+    $("#removeHidrive").click(function () {
+        $.ajax({
+            url: '/removeHidrive',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
+
+    $("#removePcloud").click(function () {
+        $.ajax({
+            url: '/removePcloud',
+            type: 'POST',
+            contentType: "application/json",
+            success: function() {
+                location.reload();
+            }
+        })
+    });
 
     $("#startWorker").click(function () {
         $.ajax({

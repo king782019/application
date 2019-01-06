@@ -183,6 +183,76 @@ public class CloudController {
 
     //====================Add providers=========================
 
+    @RequestMapping(value = "/removeGoogle", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeGoogle(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setGoogleAccount(null);
+        user.setGoogleToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removeDropbox", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeDropbox(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setDropboxAccount(null);
+        user.setDropboxToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removeBox", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeBox(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setBoxAccount(null);
+        user.setBoxToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removeOnedrive", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeOnedrive(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setOnedriveAccount(null);
+        user.setOnedriveToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removeYandex", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeYandex(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setYandexAccount(null);
+        user.setYandexToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removeHidrive", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeHidrive(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setHidriveAccount(null);
+        user.setHidriveToken(null);
+        userRepository.save(user);
+    }
+
+    @RequestMapping(value = "/removePcloud", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void removePcloud(Authentication auth) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        user.setPcloudAccount(null);
+        user.setPcloudToken(null);
+        userRepository.save(user);
+    }
+
     @RequestMapping(value = "/status", method = RequestMethod.POST)
     @ResponseBody
     private String checkStatus(Authentication auth) {
