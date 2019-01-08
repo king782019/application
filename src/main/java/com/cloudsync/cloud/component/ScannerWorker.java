@@ -939,7 +939,7 @@ public class ScannerWorker extends Thread {
                                 Instant instant1 = Instant.parse(file.modified);
                                 Instant instant2 = Instant.parse(data.modified);
                                 Instant now = Instant.now();
-                                now.minusSeconds(60);
+                                now = now.minusSeconds(60);
 
                                 if (instant1.isAfter(instant2) && now.isAfter(instant1)) {
                                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
