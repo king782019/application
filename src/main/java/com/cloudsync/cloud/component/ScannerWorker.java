@@ -721,7 +721,7 @@ public class ScannerWorker extends Thread {
             }
         }
 
-        if (counter == 0) {
+        if (counter == 0 || sync) {
             for (WorkerAccount account : accounts) {
                 if (account.getToken().equals(token)) {
                     continue;
