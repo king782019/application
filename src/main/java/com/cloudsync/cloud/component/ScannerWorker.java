@@ -889,7 +889,7 @@ public class ScannerWorker extends Thread {
                 boolean isNameHasDigit = data.name.matches(".*\\d+.*");
                 if (isNameHasDigit) {
                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
-                    break;
+                    continue;
                 }
                 long containsSame = destinationList.getMetadataList().stream().filter(x -> data.mime_type.equals(x.mime_type)).count();
                 if (containsSame >= 2) {
