@@ -732,7 +732,10 @@ public class ScannerWorker extends Thread {
                 MetadataCounter sourceList = new MetadataCounter(0, source.objects);
                 sourceList = addRootTags(sourceList);
                 sourceList = listLoop(sourceStorage, sourceList);
-
+                boolean exists = sourceList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(sourceFolder.mime_type) && x.parent.name.equals(sourceFolder.parent.name));
+                if(exists) {
+                    continue;
+                }
                 HashMap<String, Object> fileParams = new HashMap<>();
                 for (Metadata data : sourceList.getMetadataList()) {
                     if (data.type.equals("folder")) {
