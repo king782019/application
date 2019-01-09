@@ -813,6 +813,11 @@ public class ScannerWorker extends Thread {
 
         for (Metadata mData : sourceList.getMetadataList()) {
             if (mData.type.equals("file")) {
+                boolean isNameHasDigit = mData.name.matches(".*\\d+.*");
+                if (isNameHasDigit) {
+                    sourceStorage.delete(null, com.kloudless.model.File.class, mData.id);
+                    continue;
+                }
                 boolean contains = destinationList.getMetadataList().stream().anyMatch(x -> x.mime_type.equals(mData.mime_type) && x.parent.name.equals(mData.parent.name));
                 if (!contains) {
                     Instant now = Instant.now();
@@ -894,7 +899,7 @@ public class ScannerWorker extends Thread {
                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                     continue;
                 }
-                long containsSame = destinationList.getMetadataList().stream().filter(x -> data.mime_type.equals(x.mime_type)).count();
+                long containsSame = destinationList.getMetadataList().stream().filter(x -> data.mime_type.equals(x.mime_type) && data.parent.name.equals(x.parent.name)).count();
                 if (containsSame >= 2) {
                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                     break;
