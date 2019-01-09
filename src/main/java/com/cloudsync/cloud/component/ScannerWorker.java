@@ -684,7 +684,9 @@ public class ScannerWorker extends Thread {
             boolean contains = false;
             for (MetadataCounter collection : sourcesList) {
                 contains = collection.getMetadataList().stream().anyMatch(x -> x.parent.name.equals(sourceFolder.mime_type) && !sourceFolder.name.equals("root"));
-
+                if(contains) {
+                    break;
+                }
             }
             if (!contains) {
                 for (int i = 0; i < sourcesList.size(); i++) {
@@ -949,7 +951,7 @@ public class ScannerWorker extends Thread {
                                 Instant now = Instant.now();
                                 now = now.minusSeconds(60);
 
-                                if (instant1.isAfter(instant2) && now.isAfter(instant1)) {
+                                if (instant1.isAfter(instant2)) {
                                     destinationStorage.delete(null, com.kloudless.model.File.class, data.id);
                                     HashMap<String, Object> fileParams = new HashMap<>();
                                     for (Metadata Fdata : destinationList.getMetadataList()) {
