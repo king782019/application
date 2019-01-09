@@ -373,15 +373,6 @@ public class ScannerWorker extends Thread {
             int counter = Collections.frequency(objectsList, metadata);
             if (metadata.type.equals("file")) {
                 if (counter > 1) {
-                    boolean flag = false;
-                    for (Metadata metadata1 : set) {
-                        if (metadata1.type.equals("folder")) {
-                            flag = true;
-                        }
-                    }
-                    if (flag) {
-                        continue;
-                    }
                     MetadataCounter destinationList;
                     for (int i = 0; i < contentsOfAccounts.size(); i++) {
                         destinationList = contentsOfAccounts.get(i);
