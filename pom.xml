@@ -17,6 +17,13 @@
         <version>2.0.3.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+    <repositories>
+        <repository>
+            <id>cloudsync.repo</id>
+            <name>cloudsync</name>
+            <url>file:${project.basedir}/repo</url>
+        </repository>
+    </repositories>
 
 
     <properties>
@@ -119,7 +126,7 @@
         <dependency>
             <groupId>com.cloudsync</groupId>
             <artifactId>kloudless</artifactId>
-            <version>1.1.0</version>
+            <version>0.1</version>
         </dependency>
     </dependencies>
 
