@@ -1,8 +1,22 @@
 .container {
     margin-top: 20px;
     box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
-    background-image: url("../../image/background.jpg");
+    background-image: url("http://www.gsfdcy.com/data/img/19/1324892-cloud-wallpaper.jpg");
     background-size: cover;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #ffb7e0;
+}
+
+label {
+    text-shadow: -0.5px 0 white, 0 0.5px white, 0.5px 0 white, 0 -0.5px white;
+    font-size: 20px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+body {
+    background-image: url("http://www.toca-ch.com/data/walls/93/24061831.jpg");
 }
 
 .row {
@@ -10,9 +24,9 @@
 }
 
 .outline-menu {
-    margin-top: 10px;
+    /*margin-top: 10px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-    padding: 10px;
+    padding: 10px;*/
 }
 
 input {
@@ -28,15 +42,30 @@ input {
     width: 30px;
 }
 
+.btn {
+    font-weight: bold;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
 h1 {
-    text-shadow: 4px 4px #d8d7a1;
+    color: white;
+    text-shadow:
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+    font-size: 50px;
+    font-family: "Comic Sans MS";
 }
 
                        .scroll-left {
+                           margin-top: 20px;
                            height: 50px;
                            overflow: hidden;
                            position: relative;
-                           background: deepskyblue;
+                           background: #b6ffb3;
                            color: #000000;
                            border: 1px solid red;
                        }

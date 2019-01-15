@@ -30,16 +30,14 @@
 </head>
 <body>
 <div class="container">
-    <div class="row">
 
-    </div>
     <div class="row">
         <div class="col-12 d-flex justify-content-center">
             <h1>Cloud synchronization and security</h1>
 
         </div>
         <div class="col-12 d-flex justify-content-center scroll-left">
-        <p>We will offer synchronize and save your information among clouds by one click at the same time!</p>
+            <p>We will offer synchronize and save your information among clouds by one click at the same time!</p>
         </div>
     </div>
     <div class="row justify-content-between outline-menu">
@@ -47,24 +45,69 @@
             <button class="btn btn-primary" id="test">Add new provider</button>
             <br>
         </div>
+        <div id="google_translate_element"></div>
 
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+            }
+        </script>
+
+        <script type="text/javascript"
+                src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+        <br>
+        <div class="col-2 d-flex justify-content-start"></div>
         <div class="col-2 d-flex justify-content-end">
-            <a class="btn btn-outline-danger" href="/logout" role="button"><b>Logout</b></a>
+            <a class="btn btn-primary" href="/logout" role="button"><b>Logout</b></a>
         </div>
     </div>
 
     <div class="row">
         <div class="col">
-        <h3>Connected accounts:</h3>
-            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}"><label for="s1"><img class="radioImage" th:src="@{image/google.png}" /> Google Drive</label>  <button id="removeGoogle">Remove</button></input><br>
+            <h3>Connected accounts:</h3>
 
-            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"><label for="s2"><img class="radioImage" th:src="@{image/dropbox.png}" /> DropBox</label>  <button id="removeDropbox">Remove</button></input><br>
+            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}"><label for="s1"><img
+                class="radioImage" th:src="@{image/google.png}"/> Google Drive</label>
 
-            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}"><label for="s3"><img class="radioImage" th:src="@{image/onedrive.png}" /> OneDrive</label>  <button id="removeOnedrive">Remove</button></input><br>
-            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}"><label for="s4"><img class="radioImage" th:src="@{image/box.png}" /> Box</label>  <button id="removeBox">Remove</button></input><br>
-            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}"><label for="s5"><img class="radioImage" th:src="@{image/yandex.png}" /> Yandex</label>  <button id="removeYandex">Remove</button></input><br>
-            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}"><label for="s6"><img class="radioImage" th:src="@{image/hidrive.png}" /> HiDrive</label>  <button id="removeHidrive">Remove</button></input><br>
-            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}"><label for="s7"><img class="radioImage" th:src="@{image/pcloud.png}" /> pCloud</label>  <button id="removePcloud">Remove</button></input><br>
+            <button id="removeGoogle" class="btn btn-danger">Remove</button>
+            </input>
+
+            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"><label for="s2"><img
+                class="radioImage" th:src="@{image/dropbox.png}"/> DropBox</label>
+
+            <button id="removeDropbox" class="btn btn-danger">Remove</button>
+            </input>
+
+            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}"><label for="s3"><img
+                class="radioImage" th:src="@{image/onedrive.png}"/> OneDrive</label>
+
+            <button id="removeOnedrive" class="btn btn-danger">Remove</button>
+            </input><br><br>
+
+            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}"><label for="s6"><img
+                class="radioImage" th:src="@{image/hidrive.png}"/> HiDrive</label>
+
+            <button id="removeHidrive" class="btn btn-danger">Remove</button>
+            </input>
+
+            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}"><label for="s5"><img
+                class="radioImage" th:src="@{image/yandex.png}"/> Yandex</label>
+
+            <button id="removeYandex" class="btn btn-danger">Remove</button>
+            </input>
+
+            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}"><label for="s4"><img
+                class="radioImage" th:src="@{image/box.png}"/> Box</label>
+
+            <button id="removeBox" class="btn btn-danger">Remove</button>
+            </input>
+
+            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}"><label for="s7"><img
+                class="radioImage" th:src="@{image/pcloud.png}"/> pCloud</label>
+
+            <button id="removePcloud" class="btn btn-danger">Remove</button>
+            </input><br><br>
+
             <button class="btn btn-success" id="startWorker">Start</button>
             <button class="btn btn-danger" id="stopWorker">Stop</button>
             <button class="btn btn-primary" id="sync">Sync accounts</button>

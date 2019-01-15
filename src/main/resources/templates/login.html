@@ -19,6 +19,15 @@
             margin: 10px;
         }
 
+
+        h1, p {
+            color: white;
+        }
+
+        .or {
+            color: black;
+        }
+
         .btn {
             height: 50px;
         }
@@ -26,9 +35,41 @@
         .float {
             margin-top: 10px;
         }
+
+        body {
+            background-image: url("https://dazeinfo.com/wp-content/uploads/2016/04/google-drive-vs-dropbox-vs-amazon-cloud-drive-vs-microsoft-onedrive-battle.jpg");
+            background-size: cover;
+        }
+
+        .container {
+            background-color: white;
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            margin-top: 3.5%;
+            margin-left: 7%;
+        }
+        .text {
+            color: black;
+            text-shadow: -0.5px 0 yellow, 0 0.5px yellow, 0.5px 0 yellow, 0 -0.5px yellow;
+            font-size: 40px;
+        }
+        .explain {
+            color: #ff0000;
+            font-size:20px;
+        }
     </style>
 </head>
 <body>
+<div class="container">
+
+        <h1 class="text">Cloud synchronization and security</h1>
+
+        <p class="explain">MultCloud syncs two clouds or directories in two cloud accounts through one-way sync or two-way sync. One-way sync includes simple sync, mirror sync, move sync, cumulative sync, update sync, incremental backup sync and full backup sync all nine ways.
+
+            Furthermore, it supports schedule sync, task manager and logs view.</p>
+
+</div>
 <div class="text-center" style="padding: 50px 0">
     <h1 class="logo">Login</h1>
     <div class="login-form-1">
@@ -41,7 +82,7 @@
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <button type="submit" class="btn btn-lg btn-primary btn-block btn-signin float">Log in</button>
         </form>
-        <p>or
+        <p class="or">or
             <a href="/signup">Sign Up</a></p>
     </div>
 
