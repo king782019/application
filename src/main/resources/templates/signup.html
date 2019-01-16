@@ -28,11 +28,75 @@
         .float {
             margin-top: 10px;
         }
+
+        h1, p {
+            color: white;
+        }
+
+        .or {
+            color: black;
+        }
+
+        body {
+            background-image: url("https://dazeinfo.com/wp-content/uploads/2016/04/google-drive-vs-dropbox-vs-amazon-cloud-drive-vs-microsoft-onedrive-battle.jpg");
+            background-size: cover;
+        }
+
+        .container {
+
+            position: absolute;
+            width: 400px;
+            height: 600px;
+            margin-top: 3.5%;
+            margin-left: 7%;
+        }
+
+        .text {
+            color: black;
+            text-shadow: -0.3px 0 yellow, 0 0.3px yellow, 0.3px 0 yellow, 0 -0.3px yellow;
+            font-size: 40px;
+        }
+
+        .explain {
+            color: #ff0000;
+            font-size: 20px;
+        }
+
+        li {
+            font-size: 18px;
+            color: #000ad9;
+            background-color: #c9ffbf;
+        }
     </style>
 </head>
 <body>
 
+<div class="container">
 
+    <h1 class="text">Cloud synchronization and security</h1>
+
+    <p class="explain">
+    <ul>
+    <b>
+        <li>
+            Old wisdom says, “Don’t put all your eggs in one basket.”
+        </li>
+        <li>
+            In our project we let's you to spreading your workload and information across multiple different cloud
+            environments.
+        </li>
+        <li>
+            You can use of multiple cloud computing and storage services in a single heterogeneous architecture.
+        </li>
+        <li>
+            With a typical multi-cloud architecture utilizing two or more public clouds as well as multiple private
+            clouds, a multi-cloud environment aims to eliminate the reliance on any single cloud provider.
+        </li>
+    </b>
+    </ul>
+    </p>
+
+</div>
 <div class="text-center" style="padding: 50px 0">
     <h1 class="logo">Sign Up</h1>
     <div class="login-form-1">
@@ -45,7 +109,7 @@
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <button type="submit" class="btn btn-lg btn-primary btn-block btn-signin float">Sign Up</button>
         </form>
-        <p>or
+        <p class="or">or
             <a href="/login">Log In</a></p>
     </div>
 
