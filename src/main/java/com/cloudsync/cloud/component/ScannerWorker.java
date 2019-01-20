@@ -567,6 +567,7 @@ public class ScannerWorker extends Thread {
         String username = this.getName();
         User user = userRepository.findByUsername(username);
         Integer num = null;
+        Integer indexOfTeamDrives = null;
         for (int i = 0; i < sourceList.getMetadataList().size(); i++) {
             if (user.getGoogleAccount() != null) {
                 if (user.getGoogleAccount().equals(sourceList.getMetadataList().get(i).account.toString())) {
@@ -580,13 +581,23 @@ public class ScannerWorker extends Thread {
             if (sourceList.getMetadataList().get(i).name.equals("Shared with me") || sourceList.getMetadataList().get(i).raw_id.equals("shared_items")) {
                 num = i;
             }
+
+            if(sourceList.getMetadataList().get(i).name.equals("Team Drives")) {
+                indexOfTeamDrives = i;
+            }
         }
         if (num != null) {
             int ind = num;
             sourceList.getMetadataList().remove(ind);
             logger.debug("Shared with me folder deleted from source list");
         }
+        if (indexOfTeamDrives != null) {
+            int ind = indexOfTeamDrives;
+            sourceList.getMetadataList().remove(ind);
+            logger.debug("Team Drives folder deleted from source list");
+        }
         num = null;
+        indexOfTeamDrives = null;
 
         return sourceList;
 
