@@ -125,13 +125,14 @@ $(document).ready(function () {
     });
 
     $("#stopWorker").click(function () {
+        toastr.success("Worker will stop soon!");
         $.ajax({
             url: '/stop',
             type: 'POST',
             contentType: 'application/json',
             success: function() {
                 console.log("successful stop");
-                toastr.success("Worker will stop soon!");
+
             }
         })
     });
