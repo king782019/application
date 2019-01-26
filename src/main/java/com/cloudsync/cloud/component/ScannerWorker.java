@@ -16,13 +16,7 @@ import com.kloudless.model.MetadataCollection;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
-
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.time.Instant;
@@ -112,7 +106,6 @@ public class ScannerWorker extends Thread {
                 while(System.currentTimeMillis() <= end) {
                     for (WorkerAccount account : accounts) {
                         for (WorkerAccount innerAccount : accounts) {
-
                             if (!account.equals(innerAccount)) {
                                 String sourceAccount = account.getAccount();
                                 String sourceToken = account.getToken();
@@ -154,6 +147,7 @@ public class ScannerWorker extends Thread {
                     contentsOfAccounts.add(sourceList);
                     accountsAccs.add(account.getAccount());
                 }
+
                 ArrayList<Metadata> objectsList = new ArrayList<>();
                 for (int i = 0; i < contentsOfAccounts.size(); i++) {
                     for (int j = 0; j < contentsOfAccounts.size(); j++) {
@@ -187,7 +181,6 @@ public class ScannerWorker extends Thread {
                 for (WorkerAccount account : accounts) {
                     for (WorkerAccount innerAccount : accounts) {
                         if (!account.equals(innerAccount)) {
-
                             String sourceAccount = account.getAccount();
                             String sourceToken = account.getToken();
                             String destinationToken = innerAccount.getToken();
@@ -341,7 +334,6 @@ public class ScannerWorker extends Thread {
         }
 
         logger.debug("Worker exiting now");
-
 
     }
 

@@ -1,24 +1,18 @@
 package com.cloudsync.cloud.controller;
 
 import com.cloudsync.cloud.component.ScannerWorker;
-import com.cloudsync.cloud.model.MetadataCounter;
 import com.cloudsync.cloud.model.Provider;
-import com.cloudsync.cloud.model.SyncAccount;
 import com.cloudsync.cloud.model.User;
 import com.cloudsync.cloud.repository.UserRepository;
-import com.kloudless.KClient;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
-import com.kloudless.model.Folder;
-import com.kloudless.model.MetadataCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -318,7 +312,7 @@ public class CloudController {
             accountSum++;
         }
 
-        if(accountSum >= 2) {
+        if(accountSum > 2) {
             worker.setName(user.getUsername());
             worker.start();
             threads.add(worker);
@@ -394,65 +388,5 @@ public class CloudController {
         userRepository.save(newUser);
         logger.info("User requested to remove all accounts");
     }
-
-
-    /**
-     * Get files tree
-     *
-     * @param client
-     * @param list
-     * @return
-     * @throws APIException
-     * @throws UnsupportedEncodingException
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     */
-    @SuppressWarnings("Duplicates")
-    private MetadataCounter listLoop(KClient client, MetadataCounter list) throws APIException, UnsupportedEncodingException, AuthenticationException, InvalidRequestException, APIConnectionException {
-
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if(principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-        User user = userRepository.findByUsername(username);
-
-        MetadataCollection temp = new MetadataCollection();
-
-        int i = list.getCounter();
-        for (; i < list.getMetadataList().size(); i++) {
-            if (list.getMetadataList().get(i).type.equals("folder")) {
-                if (list.getMetadataList().get(i).name.equals(".hidrive")){
-                    continue;
-                }
-                temp = client.contents(null, Folder.class, list.getMetadataList().get(i).id);
-                logger.debug(String.format("Contents of folder %s have gotten", list.getMetadataList().get(i).name));
-                for (int j = 0; j < temp.objects.size(); j++) {
-                    if(user.getGoogleAccount().equals(temp.objects.get(i).account.toString())) {
-                        list.setGoogle(true);
-                    }
-                    temp.objects.get(j).parent.Id = list.getMetadataList().get(i).id;
-                    temp.objects.get(j).parent.name = list.getMetadataList().get(i).name;
-
-                }
-                break;
-            }
-
-        }
-        if (temp.objects != null) {
-            list.getMetadataList().addAll(temp.objects);
-        }
-
-        list.setCounter(i + 1);
-        if (list.getMetadataList().size() != i) {
-            return listLoop(client, list);
-        }
-
-        return list;
-    }
-
 
 }

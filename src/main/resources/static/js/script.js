@@ -1,18 +1,5 @@
 $(document).ready(function () {
 
-    var obj = {
-        source: 0,
-        destination: 0
-    };
-
-    $("#s1, #s2, #s3, #s4, #s5, #s6, #s7").change(function () {
-        obj.source = $("input[name=sourceGroup]:checked").val();
-    });
-
-    $("#d1, #d2, #d3, #d4, #d5, #d6, #d7").change(function () {
-        obj.destination = $("input[name=destinationGroup]:checked").val();
-    });
-
     $("#removeAccounts").click(function () {
         $.ajax({
             url: '/remove',
@@ -132,7 +119,6 @@ $(document).ready(function () {
             contentType: 'application/json',
             success: function() {
                 console.log("successful stop");
-
             }
         })
     });

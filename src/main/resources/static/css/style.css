@@ -86,6 +86,7 @@ h1 {
     -webkit-animation: scroll-left 40s linear infinite;
     animation: scroll-left 40s linear infinite;
 }
+
 /* Move it (define the animation) */
 @-moz-keyframes scroll-left {
     0%   { -moz-transform: translateX(100%); }
