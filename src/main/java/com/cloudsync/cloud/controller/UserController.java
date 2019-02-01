@@ -4,7 +4,11 @@ package com.cloudsync.cloud.controller;
 import com.cloudsync.cloud.model.User;
 import com.cloudsync.cloud.repository.UserRepository;
 import com.cloudsync.cloud.service.UserDetailsServiceImpl;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,13 +21,20 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Controller
 public class UserController {
+
+    private final JavaMailSender mailSender;
+    private HashMap<String, String> mailTokens = new HashMap<>();
 
     final PasswordEncoder passwordEncoder;
 
@@ -32,10 +43,18 @@ public class UserController {
     final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public UserController(PasswordEncoder passwordEncoder, UserRepository userRepository, UserDetailsServiceImpl userDetailsService) {
+    public UserController(PasswordEncoder passwordEncoder, UserRepository userRepository, UserDetailsServiceImpl userDetailsService, JavaMailSender mailSender) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
+        this.mailSender = mailSender;
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public void validateRegistrationToken(@RequestParam("token") String token) {
+        String email = mailTokens.get(token);
+        User user = userRepository.findByUsername(email);
+        user.setEnabled(true);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -61,6 +80,16 @@ public class UserController {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getUsername());
+        message.setSubject("Hi from Cloud synchronization and security");
+        if(mailTokens.size() > 10) {
+            mailTokens.clear();
+        }
+        String registrationToken = RandomStringUtils.random(20, true, true);
+        mailTokens.put(registrationToken, user.getUsername());
+        message.setText("Your registration url: http://cloudsyncro.herokuapp.com/login?token=" + registrationToken);
+        mailSender.send(message);
         return "redirect:/login";
     }
 
