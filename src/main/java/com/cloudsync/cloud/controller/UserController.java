@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public String registration(@ModelAttribute @Valid User user, BindingResult result, HttpServletRequest request) throws AddressException {
+    public String registration(@ModelAttribute @Valid User user, BindingResult result) throws AddressException {
         if (result.hasErrors()) {
             System.out.println(result);
             System.out.println(user);
@@ -93,8 +93,7 @@ public class UserController {
 
         String registrationToken = RandomStringUtils.random(20, true, true);
         mailTokens.put(registrationToken, user.getUsername());
-        String url = "http://" + request.getLocalName();
-        message.setText("Your registration url: " + url + "/login?token=" + registrationToken);
+        message.setText("Your registration url: http://cloudsyncro.herokuapp.com/login?token=" + registrationToken);
         mailSender.send(message);
         return "redirect:/login";
     }
