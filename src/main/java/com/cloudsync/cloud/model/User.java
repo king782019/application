@@ -1,9 +1,11 @@
 package com.cloudsync.cloud.model;
 
 import com.cloudsync.cloud.constraint.ValidPassword;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.context.annotation.Scope;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -13,13 +15,17 @@ import javax.validation.constraints.Size;
 public class User {
     private Long id;
 
-    @Size(min = 5, max = 30)
+    @Email
     @NotEmpty
     private String username;
 
     @ValidPassword
     @NotEmpty
     private String password;
+
+    private Boolean enabled = false;
+
+
 
     private String googleAccount;
     private String googleToken;
@@ -176,6 +182,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
 }

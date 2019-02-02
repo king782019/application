@@ -4,7 +4,11 @@ package com.cloudsync.cloud.controller;
 import com.cloudsync.cloud.model.User;
 import com.cloudsync.cloud.repository.UserRepository;
 import com.cloudsync.cloud.service.UserDetailsServiceImpl;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,16 +18,22 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Controller
 public class UserController {
+
+    private final JavaMailSender mailSender;
+    private HashMap<String, String> mailTokens = new HashMap<>();
 
     final PasswordEncoder passwordEncoder;
 
@@ -32,14 +42,25 @@ public class UserController {
     final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public UserController(PasswordEncoder passwordEncoder, UserRepository userRepository, UserDetailsServiceImpl userDetailsService) {
+    public UserController(PasswordEncoder passwordEncoder, UserRepository userRepository, UserDetailsServiceImpl userDetailsService, JavaMailSender mailSender) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
+        this.mailSender = mailSender;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String login() {
+    @GetMapping("/login")
+    public String login(@RequestParam(required = false) String token) {
+        if(token != null) {
+            if(mailTokens.containsKey(token)) {
+                String email = mailTokens.get(token);
+                User user = userRepository.findByUsername(email);
+                if(user != null) {
+                    user.setEnabled(true);
+                    userRepository.save(user);
+                }
+            }
+        }
         return "login";
     }
 
@@ -49,7 +70,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public String registration(@ModelAttribute @Valid User user, BindingResult result) {
+    public String registration(@ModelAttribute @Valid User user, BindingResult result, HttpServletRequest request) throws AddressException {
         if (result.hasErrors()) {
             System.out.println(result);
             System.out.println(user);
@@ -59,8 +80,22 @@ public class UserController {
         if (temp != null) {
             return "redirect:/signup?errorExist";
         }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("gazeromo@gmail.com");
+        message.setTo("<" + user.getUsername() + ">");
+        message.setSubject("Hi from Cloud synchronization and security");
+        if(mailTokens.size() > 10) {
+            mailTokens.clear();
+        }
+
+        String registrationToken = RandomStringUtils.random(20, true, true);
+        mailTokens.put(registrationToken, user.getUsername());
+        String url = "http://" + request.getLocalName();
+        message.setText("Your registration url: " + url + "/login?token=" + registrationToken);
+        mailSender.send(message);
         return "redirect:/login";
     }
 
