@@ -2,11 +2,14 @@ package com.cloudsync.cloud.controller;
 
 
 import com.cloudsync.cloud.model.User;
+import com.cloudsync.cloud.model.UserEmail;
+import com.cloudsync.cloud.model.UserPasswordToken;
 import com.cloudsync.cloud.repository.UserRepository;
 import com.cloudsync.cloud.service.UserDetailsServiceImpl;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
@@ -34,6 +37,7 @@ public class UserController {
 
     private final JavaMailSender mailSender;
     private HashMap<String, String> mailTokens = new HashMap<>();
+    private HashMap<String, String> resetTokens = new HashMap<>();
 
     final PasswordEncoder passwordEncoder;
 
@@ -47,6 +51,44 @@ public class UserController {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
         this.mailSender = mailSender;
+    }
+
+    @GetMapping("/reset")
+    public String reset() {
+        return "reset";
+    }
+
+    @PostMapping("/reset")
+    public String resetPassword(@ModelAttribute @Valid UserEmail user) {
+        String token = RandomStringUtils.random(20, true, true);
+        if(resetTokens.size() > 10) {
+            resetTokens.clear();
+        }
+        resetTokens.put(token, user.getMail());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("gazeromo@gmail.com");
+        message.setTo("<" + user.getMail() + ">");
+        message.setSubject("Hi from Cloud synchronization and security");
+
+        message.setText("Your reset token: " + token);
+        mailSender.send(message);
+        return "newPassword";
+    }
+
+    @GetMapping("/newPassword")
+    public String newPasswordForm() {
+        return "newPassword";
+    }
+
+    @PostMapping("/newPassword")
+    public String newPassword(@ModelAttribute @Valid UserPasswordToken user) {
+        if(resetTokens.containsKey(user.getToken())) {
+            String email = resetTokens.get(user.getToken());
+            User tempUser = userRepository.findByUsername(email);
+            tempUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(tempUser);
+        }
+        return "login";
     }
 
     @GetMapping("/login")
