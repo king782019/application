@@ -66,7 +66,7 @@ public class UserController {
         }
         resetTokens.put(token, user.getMail());
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("gazeromo@gmail.com");
+        message.setFrom("my.ghassan2016@gmail.com");
         message.setTo("<" + user.getMail() + ">");
         message.setSubject("Hi from Cloud synchronization and security");
 
@@ -126,7 +126,7 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("gazeromo@gmail.com");
+        message.setFrom("my.ghassan2016@gmail.com");
         message.setTo("<" + user.getUsername() + ">");
         message.setSubject("Hi from Cloud synchronization and security");
         if(mailTokens.size() > 10) {
