@@ -10,6 +10,14 @@
     padding: 30px;
 }
 
+.semiopacity {
+    background: #08509b; /* Цвет фона */
+    padding: 5px; /* Поля вокруг текста */
+    opacity: 0.7; /* Полупрозрачный фон */
+    filter: alpha(Opacity=70); /* Прозрачность в IE */
+    color: #fff; /* Цвет текста */
+}
+
 label {
     text-shadow: -0.5px 0 white, 0 0.5px white, 0.5px 0 white, 0 -0.5px white;
     font-size: 22px;
