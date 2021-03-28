@@ -13,10 +13,14 @@
 
     <style>
         .login-form-1 {
+            position: relative;
             max-width: 300px;
             border-radius: 5px;
             display: inline-block;
             margin: 10px;
+            padding: 5px;
+            background: rgba(0, 82, 155, 0.8);
+            box-shadow: 0 0 15px 15px rgba(0, 82, 155, 0.8);
         }
 
 
@@ -37,65 +41,41 @@
         }
 
         body {
-            background-image: url("https://dazeinfo.com/wp-content/uploads/2016/04/google-drive-vs-dropbox-vs-amazon-cloud-drive-vs-microsoft-onedrive-battle.jpg");
+            background-image: url("https://ltdfoto.ru/images/background1.jpg");
             background-size: cover;
         }
-
+        A {
+            color: #caddeb;
+        }
+        A:hover {
+            color: midnightblue;
+        }
         .container {
             position: absolute;
             width: 400px;
             height: 400px;
             margin-top: 3.5%;
             margin-left: 7%;
+            filter: blur(1px);
         }
         .text {
-            color: black;
-            text-shadow: -0.3px 0 yellow, 0 0.3px yellow, 0.3px 0 yellow, 0 -0.3px yellow;
-            font-size: 40px;
-        }
-        .explain {
-            color: #ff0000;
-            font-size:20px;
+            color: white;
+            font-size: 48px;
+            opacity: .8;
         }
 
-        li {
-            font-size: 18px;
-            color: #000ad9;
-            background-color: #c9ffbf;
-        }
     </style>
 </head>
 <body>
 <div class="container">
 
-        <h1 class="text">Cloud synchronization and security</h1>
-
-        <p class="explain">
-    <ul>
-        <b>
-            <li>
-                Old wisdom says, “Don’t put all your eggs in one basket.”
-            </li>
-            <li>
-                In our project we let's you to spreading your workload and information across multiple different cloud
-                environments.
-            </li>
-            <li>
-                You can use of multiple cloud computing and storage services in a single heterogeneous architecture.
-            </li>
-            <li>
-                With a typical multi-cloud architecture utilizing two or more public clouds as well as multiple private
-                clouds, a multi-cloud environment aims to eliminate the reliance on any single cloud provider.
-            </li>
-        </b>
-    </ul>
-        </p>
+    <h1 class="text">Cloud synchronization and security</h1>
 
 </div>
 <div class="text-center" style="padding: 50px 0">
     <h1 class="logo">Login</h1>
-    <div class="login-form-1">
 
+    <div class="login-form-1">
         <p th:if="${param.error}">Invalid Login or Password</p>
         <p th:if="${param.logout}">Logout successful!</p>
         <form id="login-form" class="text-left" th:action="@{/login}" method="post">

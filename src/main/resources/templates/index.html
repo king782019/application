@@ -21,7 +21,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"
           integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.mi,.ln.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script th:src="@{js/script.js}" type="text/javascript"></script>
     <script th:src="@{js/jquery.loading.js}" type="application/javascript"></script>
     <link rel="stylesheet" th:href="@{css/style.css}" type="text/css">
@@ -40,11 +41,13 @@
         </div>
     </div>
     <div class="row justify-content-between outline-menu">
-        <div class="col-10 d-flex justify-content-start">
-            <button class="btn btn-primary" id="test">Add new provider</button>
-            <br>
+        <div id="google_translate_element" class="col-12 d-flex justify-content-end"> <br></div>
+        <div class="col-12 d-flex justify-content-end">
+            <a class="btn btn-primary" href="/logout" role="button"><b>Logout</b></a>
         </div>
-        <div id="google_translate_element"></div>
+        <div class="col-12 d-flex justify-content-start">
+            <button class="btn btn-primary" id="test">Add new provider</button>
+        </div>
 
         <script type="text/javascript">
             function googleTranslateElementInit() {
@@ -54,65 +57,64 @@
 
         <script type="text/javascript"
                 src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-        <br>
-        <div class="col-2 d-flex justify-content-start"></div>
-        <div class="col-2 d-flex justify-content-end">
-            <a class="btn btn-primary" href="/logout" role="button"><b>Logout</b></a>
-        </div>
+
     </div>
+
+    <br>
 
     <div class="row">
         <div class="col">
             <h3>Connected accounts:</h3>
+            <br>
 
-            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}"><label for="s1"><img
-                class="radioImage" th:src="@{image/google.png}"/> Google Drive</label>
+            <input type="radio" class="col-1" name="sourceGroup" id="s1" value="1" th:if="${googleExists}">
+            <label class="col-1" th:if="${!googleExists}"></label>
+            <label for="s1" class="col-4"><img class="radioImage" th:src="@{image/google.png}"/> Google Drive</label>
+            <button id="removeGoogle" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <button id="removeGoogle" class="btn btn-danger">Remove</button>
-            </input>
+            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">
+            <label class="col-1" th:if="${!dropboxExists}"></label>
+            <label for="s2" class="col-4"><img class="radioImage" th:src="@{image/dropbox.png}"/> DropBox</label>
+            <button id="removeDropbox" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"><label for="s2"><img
-                class="radioImage" th:src="@{image/dropbox.png}"/> DropBox</label>
+            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">
+            <label class="col-1" th:if="${!onedriveExists}"></label>
+            <label for="s3" class="col-4"><img class="radioImage" th:src="@{image/onedrive.png}"/> OneDrive</label>
+            <button id="removeOnedrive" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <button id="removeDropbox" class="btn btn-danger">Remove</button>
-            </input>
+            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}">
+            <label class="col-1" th:if="${!hidriveExists}"></label>
+            <label for="s6" class="col-4"><img class="radioImage" th:src="@{image/hidrive.png}"/> HiDrive</label>
+            <button id="removeHidrive" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}"><label for="s3"><img
-                class="radioImage" th:src="@{image/onedrive.png}"/> OneDrive</label>
+            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}">
+            <label class="col-1" th:if="${!yandexExists}"></label>
+            <label for="s5" class="col-4"><img class="radioImage" th:src="@{image/yandex.png}"/> Yandex</label>
+            <button id="removeYandex" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <button id="removeOnedrive" class="btn btn-danger">Remove</button>
-            </input><br><br>
+            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}">
+            <label class="col-1" th:if="${!boxExists}"></label>
+            <label for="s4" class="col-4"><img class="radioImage" th:src="@{image/box.png}"/> Box</label>
+            <button id="removeBox" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br>
 
-            <input type="radio" name="sourceGroup" id="s6" value="6" th:if="${hidriveExists}"><label for="s6"><img
-                class="radioImage" th:src="@{image/hidrive.png}"/> HiDrive</label>
+            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}">
+            <label class="col-1" th:if="${!pcloudExists}"></label>
+            <label for="s7" class="col-4"><img class="radioImage" th:src="@{image/pcloud.png}"/> pCloud</label>
+            <button id="removePcloud" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <br><br>
 
-            <button id="removeHidrive" class="btn btn-danger">Remove</button>
-            </input>
-
-            <input type="radio" name="sourceGroup" id="s5" value="5" th:if="${yandexExists}"><label for="s5"><img
-                class="radioImage" th:src="@{image/yandex.png}"/> Yandex</label>
-
-            <button id="removeYandex" class="btn btn-danger">Remove</button>
-            </input>
-
-            <input type="radio" name="sourceGroup" id="s4" value="4" th:if="${boxExists}"><label for="s4"><img
-                class="radioImage" th:src="@{image/box.png}"/> Box</label>
-
-            <button id="removeBox" class="btn btn-danger">Remove</button>
-            </input>
-
-            <input type="radio" name="sourceGroup" id="s7" value="7" th:if="${pcloudExists}"><label for="s7"><img
-                class="radioImage" th:src="@{image/pcloud.png}"/> pCloud</label>
-
-            <button id="removePcloud" class="btn btn-danger">Remove</button>
-            </input><br><br>
-
-            <button class="btn btn-success" id="startWorker">Start</button>
-            <button class="btn btn-danger" id="stopWorker">Stop</button>
-            <button class="btn btn-primary" id="sync">Sync accounts</button>
+            <button class="btn btn-success btn-s" id="startWorker">Start</button>
+            <button class="btn btn-danger btn-s" id="stopWorker">Stop</button>
+            <button class="btn btn-primary btn-s" id="sync">Sync accounts</button>
             <br>
             <br>
-            <button class="btn btn-secondary" id="removeAccounts">Remove Accounts</button>
+            <button class="btn btn-secondary" id="removeAccounts"><i class="fa fa-trash"> Remove Accounts</i> </button>
             <button class="btn btn-secondary" id="chechStatus">Check worker status</button>
 
             <p class="status"></p>

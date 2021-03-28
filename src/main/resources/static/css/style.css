@@ -1,22 +1,23 @@
 .container {
     margin-top: 20px;
     box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
-    background-image: url("http://www.gsfdcy.com/data/img/19/1324892-cloud-wallpaper.jpg");
-    background-size: cover;
+/*    background-image: url("http://www.gsfdcy.com/data/img/19/1324892-cloud-wallpaper.jpg");
+    background-size: cover;*/
+    background-color: aliceblue;
     border-style: solid;
     border-width: 3px;
-    border-color: #ffb7e0;
+    border-color: #08509b;
+    padding: 30px;
 }
 
 label {
     text-shadow: -0.5px 0 white, 0 0.5px white, 0.5px 0 white, 0 -0.5px white;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
-    font-style: italic;
 }
 
 body {
-    background-image: url("http://www.toca-ch.com/data/walls/93/24061831.jpg");
+    background-color: #00529c;
 }
 
 .row {
@@ -24,7 +25,7 @@ body {
 }
 
 .outline-menu {
-    /*margin-top: 10px;
+/*    margin-top: 10px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     padding: 10px;*/
 }
@@ -40,35 +41,34 @@ input {
 .radioImage {
     height: 30px;
     width: 30px;
+    margin: 5px;
 }
 
 .btn {
     font-weight: bold;
     border-style: solid;
     border-width: 1px;
-    border-color: black;
+}
+
+.btn-s {
+    width: 150px;
 }
 
 h1 {
-    color: white;
-    text-shadow:
-            -1px -1px 0 #000,
-            1px -1px 0 #000,
-            -1px 1px 0 #000,
-            1px 1px 0 #000;
+    color: #00529c;
     font-size: 50px;
-    font-family: "Comic Sans MS";
 }
 
-                       .scroll-left {
-                           margin-top: 20px;
-                           height: 50px;
-                           overflow: hidden;
-                           position: relative;
-                           background: #b6ffb3;
-                           color: #000000;
-                           border: 1px solid red;
-                       }
+.scroll-left {
+   margin-top: 20px;
+   height: 50px;
+   overflow: hidden;
+   position: relative;
+   background: #2282e7;
+   color: #000000;
+   border: 1px solid #08509b;
+}
+
 .scroll-left p {
     font-size: 25px;
     position: absolute;
