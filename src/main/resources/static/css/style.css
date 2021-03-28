@@ -5,14 +5,13 @@
     background-size: cover;*/
     background-color: aliceblue;
     border-style: solid;
-    border-width: 3px;
+    border-width: 15px;
     border-color: #08509b;
     padding: 30px;
 }
 
 .semiopacity {
     background: #08509b; /* Цвет фона */
-    padding: 5px; /* Поля вокруг текста */
     opacity: 0.7; /* Полупрозрачный фон */
     filter: alpha(Opacity=70); /* Прозрачность в IE */
     color: #fff; /* Цвет текста */
