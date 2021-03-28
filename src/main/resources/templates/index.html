@@ -67,7 +67,7 @@
             <h3>Connected accounts:</h3>
             <br/>
 
-            <input type="radio" name="sourceGroup" id="s1" value="1 + " th:value="${googleExists}"
+            <input type="radio" name="sourceGroup" id="s1" value="1 + " th:value="${dropboxExists}"
                    th:if="${googleExists}"/>
             <label class="col-1" th:if="${!googleExists}"></label>
             <label for="s1" class="col-4"><img class="radioImage" th:src="@{image/google.png}"/> Google Drive</label>
