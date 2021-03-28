@@ -11,7 +11,7 @@
 }
 
 .semiopacity {
-    background: #08509b; /* Цвет фона */
+    background: #362474; /* Цвет фона */
     opacity: 0.7; /* Полупрозрачный фон */
     filter: alpha(Opacity=70); /* Прозрачность в IE */
     color: #fff; /* Цвет текста */
@@ -62,7 +62,7 @@ input {
 }
 
 h1 {
-    color: #00529c;
+    color: #e18af5;
     font-size: 50px;
 }
 
