@@ -67,19 +67,21 @@
             <h3>Connected accounts:</h3>
             <br/>
 
-            <input type="radio" name="sourceGroup" id="s1" value="1 + " th:value="${dropboxExists}"
-                   th:if="${googleExists}"/>
+            <input type="radio" name="sourceGroup" id="s1" value="1" th:if="${googleExists}"/>
             <label class="col-1" th:if="${!googleExists}"></label>
             <label for="s1" class="col-4"><img class="radioImage" th:src="@{image/google.png}"/> Google Drive</label>
             <button id="removeGoogle" class="btn btn-outline-danger"><i class="fa fa-trash"> Remove</i></button>
             <br/>
 
-            <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"/>
-<!--            <input type="radio" name="sourceGroup" id="s10" value="3" th:if="${dropboxExists}"/>-->
-            <label class="col-1" th:if="${!dropboxExists}"></label>
-            <label for="s2" th:if="${!dropboxExists}" class="col-4"><img class="radioImage" th:src="@{image/dropbox.png}"/> DropBox</label>
-            <button id="removeDropbox" class="btn btn-outline-danger"><i class="fa fa-trash"> Remove</i></button>
-            <br/>
+            <div th:if="${dropboxExists}">
+                <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}"/>
+                <label class="col-1" th:if="${!dropboxExists}"></label>
+                <label for="s2" th:if="${!dropboxExists}" class="col-4"><img class="radioImage"
+                                                                             th:src="@{image/dropbox.png}"/>
+                    DropBox</label>
+                <button id="removeDropbox" class="btn btn-outline-danger"><i class="fa fa-trash"> Remove</i></button>
+                <br/>
+            </div>
 
             <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">
             <label class="col-1" th:if="${!onedriveExists}"></label>
