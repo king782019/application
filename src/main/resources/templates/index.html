@@ -75,8 +75,9 @@
 
             <input type="radio" name="sourceGroup" id="s2" value="2" th:if="${dropboxExists}">
             <label class="col-1" th:if="${!dropboxExists}"></label>
-            <label for="s2" class="col-4"><img class="radioImage" th:src="@{image/dropbox.png}"/> DropBox</label>
-            <button id="removeDropbox" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
+            <label for="s2" th:if="${!dropboxExists}" class="col-4"><img class="radioImage"
+                                                                         th:src="@{image/dropbox.png}"/> DropBox</label>
+            <button id="removeDropbox" th:if="${!dropboxExists}" class="btn btn-outline-danger"> <i class="fa fa-trash"> Remove</i> </button>
             <br/>
 
             <input type="radio" name="sourceGroup" id="s3" value="3" th:if="${onedriveExists}">
