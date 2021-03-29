@@ -54,7 +54,11 @@ input {
 .btn {
     font-weight: bold;
     border-style: solid;
-    border-width: 1px;
+    border-width: 3px;
+}
+
+.btn-outline-danger{
+    color: white;
 }
 
 .btn-s {
