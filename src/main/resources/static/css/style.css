@@ -98,15 +98,22 @@ h1 {
     animation: scroll-left 40s linear infinite;
 }
 
+#toast-container {
+    position: fixed;
+    height:1px;
+    z-index: 9999999;
+    pointer-events: auto;
+}
+
 .toast-message{
     color: #e18af5;
     margin-bottom: -90px !important;
 }
-.toast-top-right{
-    display: flex;
-    justify-content: center;
+/*.toast-top-right{*/
+/*    display: flex;*/
+/*    justify-content: center;*/
 
-}
+/*}*/
 
 /* Move it (define the animation) */
 @-moz-keyframes scroll-left {
