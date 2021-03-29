@@ -94,6 +94,10 @@ h1 {
     animation: scroll-left 40s linear infinite;
 }
 
+.toast-message{
+    color: #e18af5;
+}
+
 /* Move it (define the animation) */
 @-moz-keyframes scroll-left {
     0%   { -moz-transform: translateX(100%); }
