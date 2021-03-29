@@ -98,9 +98,9 @@ h1 {
     color: #e18af5;
 }
 .toast-top-right{
-
     display: flex;
     justify-content: center;
+    margin-bottom: -90px !important;
 }
 
 /* Move it (define the animation) */
