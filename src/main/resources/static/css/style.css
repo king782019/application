@@ -96,11 +96,12 @@ h1 {
 
 .toast-message{
     color: #e18af5;
+    margin-bottom: -90px !important;
 }
 .toast-top-right{
     display: flex;
     justify-content: center;
-    margin-bottom: -90px !important;
+
 }
 
 /* Move it (define the animation) */
