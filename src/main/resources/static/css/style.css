@@ -98,14 +98,14 @@ h1 {
     animation: scroll-left 40s linear infinite;
 }
 
-#toast-container {
-    display: flex;
-    justify-content: center;
-    /*position: fixed;*/
-    height:1px;
-    z-index: 9999999;
-    pointer-events: auto;
-}
+/*#toast-container {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    !*position: fixed;*!*/
+/*    height:1px;*/
+/*    z-index: 9999999;*/
+/*    pointer-events: auto;*/
+/*}*/
 
 .toast-message{
     color: #e18af5;
