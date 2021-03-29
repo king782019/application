@@ -99,7 +99,9 @@ h1 {
 }
 
 #toast-container {
-    position: fixed;
+    display: flex;
+    justify-content: center;
+    /*position: fixed;*/
     height:1px;
     z-index: 9999999;
     pointer-events: auto;
@@ -107,7 +109,7 @@ h1 {
 
 .toast-message{
     color: #e18af5;
-    margin-bottom: -90px !important;
+
 }
 /*.toast-top-right{*/
 /*    display: flex;*/
