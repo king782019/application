@@ -97,6 +97,10 @@ h1 {
 .toast-message{
     color: #e18af5;
 }
+.toast-top-right{
+    margin-top: -35px;
+    float: right;
+}
 
 /* Move it (define the animation) */
 @-moz-keyframes scroll-left {
