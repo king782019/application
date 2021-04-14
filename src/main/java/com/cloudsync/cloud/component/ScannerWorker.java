@@ -129,6 +129,7 @@ public class ScannerWorker extends Thread {
                 ArrayList<String> accountsAccs = new ArrayList<>();
                 for (WorkerAccount account : accounts) {
                     System.out.println("in Accounts");
+                    System.out.println("Account Name: " + account.getAccount());
                     KClient sourceStorage = new KClient(account.getToken(), account.getAccount(), null);
                     Kloudless.apiKey = "MFGI0NG60W7up7B43V1PoosNIs1lSLyRF9AbC4VrWiqfA4Ai";
                     MetadataCollection source = null;
