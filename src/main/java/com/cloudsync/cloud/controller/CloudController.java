@@ -51,6 +51,7 @@ public class CloudController {
         String accountName = tempAccountName.substring(tempAccountName.indexOf("@")+1);
         System.out.println(accountName + " Проверка переменной при добавлении WebDAV");
         if(!accountName.contains("@")) {
+            System.out.println(accountName + " Проверка кейса до добавления");
             switch(accountName) {
                 case "webdav.yandex.ru":
                     addServiceYandex(provider, auth);
@@ -62,6 +63,7 @@ public class CloudController {
                     addServicePcloud(provider, auth);
                     break;
             }
+            System.out.println(accountName + " Проверка кейса после добавления");
         } else {
             String newAcc = accountName.substring(accountName.indexOf("@")+1);
             switch(newAcc) {
