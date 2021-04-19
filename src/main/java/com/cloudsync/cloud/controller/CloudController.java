@@ -49,6 +49,7 @@ public class CloudController {
     public String addWebDav(@RequestBody Provider provider, Authentication auth) throws APIException, APIConnectionException, AuthenticationException, InvalidRequestException, UnsupportedEncodingException {
         String tempAccountName = provider.getAccount().getAccount();
         String accountName = tempAccountName.substring(tempAccountName.indexOf("@")+1);
+        System.out.println(accountName + " Проверка переменной при добавлении WebDAV");
         if(!accountName.contains("@")) {
             switch(accountName) {
                 case "webdav.yandex.ru":
