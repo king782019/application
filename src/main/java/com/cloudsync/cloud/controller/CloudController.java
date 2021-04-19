@@ -50,10 +50,10 @@ public class CloudController {
         String tempAccountName = provider.getAccount().getAccount();
         String accountName = tempAccountName.substring(tempAccountName.indexOf("@")+1);
         System.out.println(accountName + " Проверка переменной при добавлении WebDAV");
-        if(!accountName.contains("@")) {
+        if(accountName.contains("@")) {
             System.out.println(accountName + " Проверка кейса до добавления");
             switch(accountName) {
-                case "webdav.yandex.ru":
+                case "yandex.ru@webdav.yandex.ru":
                     addServiceYandex(provider, auth);
                     break;
                 case "webdav.hidrive.strato.com":
